@@ -1,2 +1,3 @@
-doc
-doc/**
+scripts/keys
+scripts/keys/**
+.env

@@ -1,0 +1,12 @@
+# -- Development only - hot reload via tsx watch
+# -- Source is mounted as a volume, no COPY needed
+FROM node:20-alpine
+
+WORKDIR /app
+
+# -- Install dependencies first (cached layer)
+COPY package.json .
+RUN npm install
+
+# -- tsx watch will pick up changes from the mounted volume
+CMD ["npm", "run", "dev"]

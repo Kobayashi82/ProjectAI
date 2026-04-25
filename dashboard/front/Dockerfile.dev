@@ -1,0 +1,11 @@
+# -- Development only - Vite dev server with hot module replacement
+FROM node:20-alpine
+
+WORKDIR /app
+
+# -- Install dependencies first (cached layer)
+COPY package.json .
+RUN npm install
+
+# -- Vite picks up changes from the mounted volume automatically
+CMD ["npm", "run", "dev", "--", "--host"]

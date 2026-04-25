@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	* {
+		box-sizing: border-box;
+	}
+
+	body {
+		@apply bg-surface-base text-accent font-mono;
+		background-image:
+			/* Subtle grid pattern for terminal feel */
+			linear-gradient(rgba(0, 255, 157, 0.03) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(0, 255, 157, 0.03) 1px, transparent 1px);
+		background-size: 32px 32px;
+	}
+
+	/* -- Scanline overlay effect */
+	body::after {
+		content: '';
+		position: fixed;
+		inset: 0;
+		background: repeating-linear-gradient(
+			0deg,
+			transparent,
+			transparent 2px,
+			rgba(0, 0, 0, 0.08) 2px,
+			rgba(0, 0, 0, 0.08) 4px
+		);
+		pointer-events: none;
+		z-index: 9999;
+	}
+
+	/* -- Custom scrollbar */
+	::-webkit-scrollbar {
+		width: 4px;
+	}
+	::-webkit-scrollbar-track {
+		@apply bg-surface-base;
+	}
+	::-webkit-scrollbar-thumb {
+		@apply bg-accent/30 rounded;
+	}
+
+	/* -- Selection color */
+	::selection {
+		@apply bg-accent text-surface-base;
+	}
+}
+
+@layer components {
+	.terminal-border {
+		@apply border border-surface-border;
+		box-shadow: 0 0 0 1px rgba(0, 255, 157, 0.05), inset 0 0 20px rgba(0, 255, 157, 0.02);
+	}
+
+	.terminal-border:hover {
+		@apply border-accent/20;
+		box-shadow: 0 0 0 1px rgba(0, 255, 157, 0.1), inset 0 0 20px rgba(0, 255, 157, 0.04);
+	}
+
+	.glow {
+		text-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
+	}
+
+	.btn-action {
+		@apply px-3 py-1.5 text-[10px] font-mono tracking-widest uppercase
+			border border-surface-border bg-surface-card
+			text-accent/70 transition-all duration-150
+			cursor-pointer;
+		-webkit-tap-highlight-color: transparent;
+		touch-action: manipulation;
+	}
+
+	.btn-action-danger {
+		@apply btn-action border-red-900/50 text-red-400/70;
+	}
+
+	.btn-service {
+		@apply px-2 py-1.5 text-[10px] font-mono tracking-widest uppercase
+			border border-surface-border bg-surface-card
+			text-accent/60 transition-all duration-150
+			cursor-pointer flex items-center gap-2;
+		-webkit-tap-highlight-color: transparent;
+		touch-action: manipulation;
+	}
+
+	.btn-refresh {
+		@apply inline-flex items-center justify-center p-1.5 text-accent/30 transition-colors duration-150
+			cursor-pointer;
+		-webkit-tap-highlight-color: transparent;
+		touch-action: manipulation;
+	}
+
+	@media (hover: hover) and (pointer: fine) {
+		.btn-action:hover {
+			@apply border-accent/40 text-accent bg-accent-muted;
+		}
+
+		.btn-action-danger:hover {
+			@apply border-red-500/50 text-red-400 bg-red-500/10;
+		}
+
+		.btn-service:hover {
+			@apply border-accent/30 text-accent bg-accent-muted;
+		}
+
+		.btn-refresh:hover {
+			@apply text-accent/60;
+		}
+
+		.btn-action:active,
+		.btn-service:active,
+		.btn-refresh:active {
+			transform: scale(0.95);
+		}
+	}
+}
