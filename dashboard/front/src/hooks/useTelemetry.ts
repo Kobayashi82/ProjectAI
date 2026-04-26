@@ -38,7 +38,7 @@ interface UseTelemetryResult {
 	loading: boolean
 }
 
-const POLL_INTERVAL_MS = 2_000
+const POLL_INTERVAL_MS = 3_000
 
 export function useTelemetry(machine: 'pc' | 'rpi' | 'vps', enabled: boolean): UseTelemetryResult {
 	const [data, setData] = useState<TelemetryData | null>(null)

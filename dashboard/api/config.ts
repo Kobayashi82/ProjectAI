@@ -22,6 +22,6 @@ export const config = {
 	SSH_KEY_PATH: '/app/privatekey',
 
 	// -- Telemetry agent ports running on each machine
-	PERFORMANCE_PADRE_PORT: parseInt(optional('TELEMETRY_PC_PORT', '8000')),
-	PERFORMANCE_RASPBERRY_PORT: parseInt(optional('TELEMETRY_RPI_PORT', '8000')),
+	PERFORMANCE_PC_PORT: parseInt(optional('TELEMETRY_PC_PORT', '8000')),
+	PERFORMANCE_RPI_PORT: parseInt(optional('TELEMETRY_RPI_PORT', '8000')),
 }

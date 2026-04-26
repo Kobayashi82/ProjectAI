@@ -19,12 +19,14 @@ log:
 
 session:
   secret: $(openssl rand -base64 64 | tr -d '\n')
+  remember_me: 1M
   cookies:
     - domain: $DOMAIN
       authelia_url: https://$AUTHELIA_DOMAIN
       default_redirection_url: https://$DOMAIN
       expiration: 1h
       inactivity: 15m
+      remember_me: 1M
 
 identity_validation:
   reset_password:
@@ -41,6 +43,12 @@ access_control:
   default_policy: deny
   rules:
     - domain: $AUTHELIA_DOMAIN
+      policy: bypass
+    - domain: $DOMAIN
+      resources:
+        - '^/manifest\\.json$'
+        - '^/icons/.*$'
+        - '^\\.well-known/.*$'
       policy: bypass
     - domain: $DOMAIN
       policy: one_factor

@@ -46,7 +46,7 @@ const Bar = ({ value }: { value: number }) => (
     <div className="w-full h-px bg-surface-border mt-1 mb-2">
         <div
             className={`h-full ${usageBar(value)} transition-all duration-500`}
-            style={{ width: `${Math.min(value, 100)}%`, opacity: 0.7 }}
+            style={{ width: `${Math.min(value, 100)}%`, opacity: 0.4 }}
         />
     </div>
 )
@@ -100,10 +100,10 @@ const toHttpsUrl = (domain: string | undefined, key: string, path = '') => {
 
 // ─── Links estáticos (Files, servicios, AI) ───────────────────────────────────
 const SERVICE_LINKS: Record<string, { label: string; url: string }[]> = {
-    pc:  [{ label: 'Files',     url: toHttpsUrl(import.meta.env.VITE_FILEBROWSER_PADRE_DOMAIN, 'VITE_FILEBROWSER_PADRE_DOMAIN') },
-        { label: 'Torrent',   url: toHttpsUrl(import.meta.env.VITE_TORRENT_PADRE_DOMAIN, 'VITE_TORRENT_PADRE_DOMAIN') }],
-    rpi: [{ label: 'Files',     url: toHttpsUrl(import.meta.env.VITE_FILEBROWSER_RASPBERRY_DOMAIN, 'VITE_FILEBROWSER_RASPBERRY_DOMAIN') },
-        { label: 'Torrent',   url: toHttpsUrl(import.meta.env.VITE_TORRENT_RASPBERRY_DOMAIN, 'VITE_TORRENT_RASPBERRY_DOMAIN') }],
+    pc:  [{ label: 'Files',     url: toHttpsUrl(import.meta.env.VITE_FILEBROWSER_PC_DOMAIN, 'VITE_FILEBROWSER_PC_DOMAIN') },
+        { label: 'Torrent',   url: toHttpsUrl(import.meta.env.VITE_TORRENT_PC_DOMAIN, 'VITE_TORRENT_PC_DOMAIN') }],
+    rpi: [{ label: 'Files',     url: toHttpsUrl(import.meta.env.VITE_FILEBROWSER_RPI_DOMAIN, 'VITE_FILEBROWSER_RPI_DOMAIN') },
+        { label: 'Torrent',   url: toHttpsUrl(import.meta.env.VITE_TORRENT_RPI_DOMAIN, 'VITE_TORRENT_RPI_DOMAIN') }],
     vps: [{ label: 'Files',     url: toHttpsUrl(import.meta.env.VITE_FILEBROWSER_VPS_DOMAIN, 'VITE_FILEBROWSER_VPS_DOMAIN') },
         { label: 'Portainer', url: toHttpsUrl(import.meta.env.VITE_PORTAINER_DOMAIN, 'VITE_PORTAINER_DOMAIN') }],
 }

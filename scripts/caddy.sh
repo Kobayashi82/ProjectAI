@@ -21,7 +21,7 @@ ${DOMAIN} {
     @api path /api*
     reverse_proxy @api wireguard:4000
 
-    reverse_proxy front:3000
+    reverse_proxy front:80
 }
 
 # -------- AUTHELIA --------
@@ -141,68 +141,37 @@ ${FILEBROWSER_VPS_DOMAIN} {
     reverse_proxy filebrowser-vps:${FILEBROWSER_VPS_PORT}
 }
 
-${FILEBROWSER_PADRE_DOMAIN} {
+${FILEBROWSER_PC_DOMAIN} {
     forward_auth authelia:${AUTHELIA_PORT} {
         uri /api/authz/forward-auth
         copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
     }
-    reverse_proxy wireguard:${FILEBROWSER_PADRE_PORT}
+    reverse_proxy wireguard:${FILEBROWSER_PC_PORT}
 }
 
-${FILEBROWSER_RASPBERRY_DOMAIN} {
+${FILEBROWSER_RPI_DOMAIN} {
     forward_auth authelia:${AUTHELIA_PORT} {
         uri /api/authz/forward-auth
         copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
     }
-    reverse_proxy wireguard:${FILEBROWSER_RASPBERRY_PORT}
+    reverse_proxy wireguard:${FILEBROWSER_RPI_PORT}
 }
 
 # -------- TORRENT --------
 
-${TORRENT_PADRE_DOMAIN} {
+${TORRENT_PC_DOMAIN} {
     forward_auth authelia:${AUTHELIA_PORT} {
         uri /api/authz/forward-auth
         copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
     }
-    reverse_proxy wireguard:${TORRENT_PADRE_PORT}
+    reverse_proxy wireguard:${TORRENT_PC_PORT}
 }
 
-${TORRENT_RASPBERRY_DOMAIN} {
+${TORRENT_RPI_DOMAIN} {
     forward_auth authelia:${AUTHELIA_PORT} {
         uri /api/authz/forward-auth
         copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
     }
-    reverse_proxy wireguard:${TORRENT_RASPBERRY_PORT}
+    reverse_proxy wireguard:${TORRENT_RPI_PORT}
 }
 EOF
-
-
-
-
-
-# # Create Caddyfile
-# sed \
-#     -e "s/\${DOMAIN}/$DOMAIN/g" \
-#     -e "s/\${AUTHELIA_DOMAIN}/$AUTHELIA_DOMAIN/g" \
-# 	-e "s/\${AUTHELIA_PORT}/$AUTHELIA_PORT/g" \
-# 	-e "s/\${PORTAINER_DOMAIN}/$PORTAINER_DOMAIN/g" \
-# 	-e "s/\${PORTAINER_PORT}/$PORTAINER_PORT/g" \
-# 	-e "s/\${GUACAMOLE_DOMAIN}/$GUACAMOLE_DOMAIN/g" \
-# 	-e "s/\${GUACAMOLE_PORT}/$GUACAMOLE_PORT/g" \
-#     -e "s/\${OPENWEBUI_DOMAIN}/$OPENWEBUI_DOMAIN/g" \
-# 	-e "s/\${OPENWEBUI_PORT}/$OPENWEBUI_PORT/g" \
-#     -e "s/\${SEARXNG_DOMAIN}/$SEARXNG_DOMAIN/g" \
-# 	-e "s/\${SEARXNG_PORT}/$SEARXNG_PORT/g" \
-#     -e "s/\${COMFYUI_DOMAIN}/$COMFYUI_DOMAIN/g" \
-# 	-e "s/\${COMFYUI_PORT}/$COMFYUI_PORT/g" \
-#     -e "s/\${FILEBROWSER_VPS_DOMAIN}/$FILEBROWSER_VPS_DOMAIN/g" \
-# 	-e "s/\${FILEBROWSER_VPS_PORT}/$FILEBROWSER_VPS_PORT/g" \
-#     -e "s/\${FILEBROWSER_PADRE_DOMAIN}/$FILEBROWSER_PADRE_DOMAIN/g" \
-# 	-e "s/\${FILEBROWSER_PADRE_PORT}/$FILEBROWSER_PADRE_PORT/g" \
-#     -e "s/\${FILEBROWSER_RASPBERRY_DOMAIN}/$FILEBROWSER_RASPBERRY_DOMAIN/g" \
-# 	-e "s/\${FILEBROWSER_RASPBERRY_PORT}/$FILEBROWSER_RASPBERRY_PORT/g" \
-#     -e "s/\${TORRENT_PADRE_DOMAIN}/$TORRENT_PADRE_DOMAIN/g" \
-# 	-e "s/\${TORRENT_PADRE_PORT}/$TORRENT_PADRE_PORT/g" \
-#     -e "s/\${TORRENT_RASPBERRY_DOMAIN}/$TORRENT_RASPBERRY_DOMAIN/g" \
-# 	-e "s/\${TORRENT_RASPBERRY_PORT}/$TORRENT_RASPBERRY_PORT/g" \
-#     caddy/Caddyfile.template > caddy/Caddyfile

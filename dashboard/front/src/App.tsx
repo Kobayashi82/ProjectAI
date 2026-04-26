@@ -5,12 +5,13 @@ import ServiceFrame from './pages/ServiceFrame.js'
 // -- Service URLs - in production these are subdomains proxied by Caddy
 // -- In dev, swap these for localhost ports if needed
 const SERVICES = {
-	ssh_pc: 'https://guacamole.kobaya.local/#/client/ssh-pc',
-	ssh_rpi: 'https://guacamole.kobaya.local/#/client/ssh-rpi',
-	rdp: 'https://guacamole.kobaya.local/#/client/pc-rdp',
-	vnc: 'https://guacamole.kobaya.local/#/client/pc-vnc',
-	openwebui: 'https://openwebui.kobaya.local',
-	comfyui: 'https://comfyui.kobaya.local',
+    // Usamos la variable inyectada por Vite
+    ssh_pc: `https://${import.meta.env.VITE_GUACAMOLE_DOMAIN}/#/client/ssh-pc`,
+    ssh_rpi: `https://${import.meta.env.VITE_GUACAMOLE_DOMAIN}/#/client/ssh-rpi`,
+    rdp: `https://${import.meta.env.VITE_GUACAMOLE_DOMAIN}/#/client/pc-rdp`,
+    vnc: `https://${import.meta.env.VITE_GUACAMOLE_DOMAIN}/#/client/pc-vnc`,
+    openwebui: `https://${import.meta.env.VITE_OPENWEBUI_DOMAIN}`,
+    comfyui: `https://${import.meta.env.VITE_COMFYUI_DOMAIN}`,
 }
 
 export default function App() {

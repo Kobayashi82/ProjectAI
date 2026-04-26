@@ -99,7 +99,7 @@
 		}
 
 		.btn-action-danger:hover {
-			@apply border-red-500/50 text-red-400 bg-red-500/10;
+			@apply border-red-500/60 text-red-400 bg-red-500/10;
 		}
 
 		.btn-service:hover {

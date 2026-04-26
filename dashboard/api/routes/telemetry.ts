@@ -47,7 +47,7 @@ export async function telemetryRoutes(app: FastifyInstance) {
 		if (!online) return { online: false, data: null }
 
 		try {
-			const data = await fetchTelemetry(config.PC_IP, config.PERFORMANCE_PADRE_PORT)
+			const data = await fetchTelemetry(config.PC_IP, config.PERFORMANCE_PC_PORT)
 			return { online: true, data }
 		} catch {
 			return { online: true, data: null }
@@ -61,7 +61,7 @@ export async function telemetryRoutes(app: FastifyInstance) {
 		if (!online) return { online: false, data: null }
 
 		try {
-			const data = await fetchTelemetry(config.RPI_IP, config.PERFORMANCE_RASPBERRY_PORT)
+			const data = await fetchTelemetry(config.RPI_IP, config.PERFORMANCE_RPI_PORT)
 			return { online: true, data: cleanRpiDisks(data) }
 		} catch {
 			return { online: true, data: null }
