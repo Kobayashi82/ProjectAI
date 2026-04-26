@@ -248,45 +248,21 @@ services:
     restart: unless-stopped
     build:
       context: ./dashboard/front
-      dockerfile: Dockerfile.dev
-    environment:
-      - VITE_FILEBROWSER_PC_DOMAIN=${FILEBROWSER_PC_DOMAIN}
-      - VITE_TORRENT_PC_DOMAIN=${TORRENT_PC_DOMAIN}
-      - VITE_FILEBROWSER_RPI_DOMAIN=${FILEBROWSER_RPI_DOMAIN}
-      - VITE_TORRENT_RPI_DOMAIN=${TORRENT_RPI_DOMAIN}
-      - VITE_FILEBROWSER_VPS_DOMAIN=${FILEBROWSER_VPS_DOMAIN}
-      - VITE_PORTAINER_DOMAIN=${PORTAINER_DOMAIN}
-      - VITE_GUACAMOLE_DOMAIN=${GUACAMOLE_DOMAIN}
-      - VITE_COMFYUI_DOMAIN=${COMFYUI_DOMAIN}
-      - VITE_OPENWEBUI_DOMAIN=${OPENWEBUI_DOMAIN}
-      - VITE_OPENCLAW_DOMAIN=${OPENCLAW_DOMAIN}
-      - VITE_OPENCLAW_TOKEN=${OPENCLAW_TOKEN}
-    volumes:
-      - node_modules_front:/app/node_modules
-      - ./dashboard/front:/app
+      dockerfile: Dockerfile
+      args:
+        - VITE_FILEBROWSER_PC_DOMAIN=${FILEBROWSER_PC_DOMAIN}
+        - VITE_TORRENT_PC_DOMAIN=${TORRENT_PC_DOMAIN}
+        - VITE_FILEBROWSER_RPI_DOMAIN=${FILEBROWSER_RPI_DOMAIN}
+        - VITE_TORRENT_RPI_DOMAIN=${TORRENT_RPI_DOMAIN}
+        - VITE_FILEBROWSER_VPS_DOMAIN=${FILEBROWSER_VPS_DOMAIN}
+        - VITE_PORTAINER_DOMAIN=${PORTAINER_DOMAIN}
+        - VITE_GUACAMOLE_DOMAIN=${GUACAMOLE_DOMAIN}
+        - VITE_COMFYUI_DOMAIN=${COMFYUI_DOMAIN}
+        - VITE_OPENWEBUI_DOMAIN=${OPENWEBUI_DOMAIN}
+        - VITE_OPENCLAW_DOMAIN=${OPENCLAW_DOMAIN}
+        - VITE_OPENCLAW_TOKEN=${OPENCLAW_TOKEN}
     networks:
       - internal
-
-# front:
-#   container_name: front
-#   restart: unless-stopped
-#   build:
-#     context: ./dashboard/front
-#     dockerfile: Dockerfile
-#     args:
-#       - VITE_FILEBROWSER_PC_DOMAIN=${FILEBROWSER_PC_DOMAIN}
-#       - VITE_TORRENT_PC_DOMAIN=${TORRENT_PC_DOMAIN}
-#       - VITE_FILEBROWSER_RPI_DOMAIN=${FILEBROWSER_RPI_DOMAIN}
-#       - VITE_TORRENT_RPI_DOMAIN=${TORRENT_RPI_DOMAIN}
-#       - VITE_FILEBROWSER_VPS_DOMAIN=${FILEBROWSER_VPS_DOMAIN}
-#       - VITE_PORTAINER_DOMAIN=${PORTAINER_DOMAIN}
-#       - VITE_GUACAMOLE_DOMAIN=${GUACAMOLE_DOMAIN}
-#       - VITE_COMFYUI_DOMAIN=${COMFYUI_DOMAIN}
-#       - VITE_OPENWEBUI_DOMAIN=${OPENWEBUI_DOMAIN}
-#       - VITE_OPENCLAW_DOMAIN=${OPENCLAW_DOMAIN}
-#       - VITE_OPENCLAW_TOKEN=${OPENCLAW_TOKEN}
-#   networks:
-#     - internal
 
 # -------- API --------
 
@@ -298,10 +274,8 @@ services:
       - wireguard
     build:
       context: ./dashboard/api
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     volumes:
-      - node_modules_api:/app/node_modules
-      - ./dashboard/api:/app
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
     environment:
@@ -318,32 +292,6 @@ services:
       - TELEMETRY_PC_PORT=${API_PC_TELEMETRY_PORT:-8000}
       - TELEMETRY_RPI_PORT=${API_RPI_TELEMETRY_PORT:-8000}
 
-# api:
-#   container_name: api
-#   restart: unless-stopped
-#   network_mode: "service:wireguard"
-#   depends_on:
-#     - wireguard
-#   build:
-#     context: ./dashboard/api
-#     dockerfile: Dockerfile
-#   volumes:
-#     - /proc:/host/proc:ro
-#     - /sys:/host/sys:ro
-#   environment:
-#     - ADMIN_USER=${ADMIN_USER}
-#     - ADMIN_PASS=${ADMIN_PASS}
-#     - GUAC_URL=http://172.18.0.1:8080/guacamole
-#     - GUAC_PUBLIC_URL=https://${GUACAMOLE_DOMAIN}/guacamole
-#     - NODE_ENV=production
-#     - PORT=${API_PORT:-4000}
-#     - PC_IP=${API_PC_IP}
-#     - RPI_IP=${API_RPI_IP}
-#     - SSH_USER_PC=${API_PC_USER}
-#     - SSH_USER_RPI=${API_RPI_USER}
-#     - TELEMETRY_PC_PORT=${API_PC_TELEMETRY_PORT:-8000}
-#     - TELEMETRY_RPI_PORT=${API_RPI_TELEMETRY_PORT:-8000}
-
 networks:
   internal:
     driver: bridge
@@ -357,5 +305,3 @@ volumes:
   guacamole_postgres_data:
   filebrowser_config:
   filebrowser_database:
-  node_modules_front:
-  node_modules_api:
