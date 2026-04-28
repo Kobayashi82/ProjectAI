@@ -131,6 +131,16 @@ ${OPENCLAW_DOMAIN} {
 	reverse_proxy wireguard:18789
 }
 
+# -------- ACE STEP --------
+
+${ACESTEP_DOMAIN} {
+    forward_auth authelia:${AUTHELIA_PORT} {
+        uri /api/authz/forward-auth
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+    }
+    reverse_proxy wireguard:${ACESTEP_PORT}
+}
+
 # -------- FILE BROWSER --------
 
 ${FILEBROWSER_VPS_DOMAIN} {

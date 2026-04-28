@@ -25,7 +25,7 @@ session:
       authelia_url: https://$AUTHELIA_DOMAIN
       default_redirection_url: https://$DOMAIN
       expiration: 1h
-      inactivity: 15m
+      inactivity: 4h
       remember_me: 1M
 
 identity_validation:

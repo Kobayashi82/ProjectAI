@@ -167,6 +167,17 @@ services:
       - wireguard
     command: TCP-LISTEN:${COMFYUI_PORT},fork,reuseaddr TCP:${COMFYUI_WIREGUARD_IP}:${COMFYUI_WIREGUARD_PORT}
 
+# -------- ACE STEP --------
+
+  acestep:
+    image: alpine/socat:1.8.0.3
+    container_name: acestep
+    restart: unless-stopped
+    network_mode: "service:wireguard"
+    depends_on:
+      - wireguard
+    command: TCP-LISTEN:${ACESTEP_PORT},fork,reuseaddr TCP:${ACESTEP_WIREGUARD_IP}:${ACESTEP_WIREGUARD_PORT}
+
 # -------- OPENCLAW --------
 
   openclaw:

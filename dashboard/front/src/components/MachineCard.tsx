@@ -110,6 +110,7 @@ const SERVICE_LINKS: Record<string, { label: string; url: string }[]> = {
 
 const AI_LINKS: Record<string, { label: string; url: string }[]> = {
     pc: [
+		{ label: 'Ace Step',   url: toHttpsUrl(import.meta.env.VITE_ACESTEP_DOMAIN, 'VITE_ACESTEP_DOMAIN') },
         { label: 'ComfyUI',    url: toHttpsUrl(import.meta.env.VITE_COMFYUI_DOMAIN, 'VITE_COMFYUI_DOMAIN') },
         { label: 'Open WebUI', url: toHttpsUrl(import.meta.env.VITE_OPENWEBUI_DOMAIN, 'VITE_OPENWEBUI_DOMAIN') },
         {
