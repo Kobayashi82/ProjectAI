@@ -316,6 +316,6 @@ This project is licensed under the WTFPL - [Do What the Fuck You Want to Public 
 *"Keep it local. Keep it free"*
 
 <div align="center">
-  <img src="/images/ProjectAI_web.png">
+  <img src="/images/ProjectAI_w.png">
 </div>
 
