@@ -9,7 +9,7 @@
 </div>
 
 <div align="center">
-  <img src="/images/ProjectAI.jpg">
+  <img src="/images/ProjectAI_w.png">
 </div>
 
 # Project AI
@@ -314,8 +314,3 @@ This project is licensed under the WTFPL - [Do What the Fuck You Want to Public 
 **🤖 Developed by Kobayashi82 🤖**
 
 *"Keep it local. Keep it free"*
-
-<div align="center">
-  <img src="/images/ProjectAI_w.png">
-</div>
-
