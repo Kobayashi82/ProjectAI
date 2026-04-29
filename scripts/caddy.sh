@@ -59,30 +59,14 @@ ${GUACAMOLE_DOMAIN} {
     }
 }
 
-# -------- OPEN WEBUI --------
+# -------- ACE STEP --------
 
-${OPENWEBUI_DOMAIN} {
+${ACESTEP_DOMAIN} {
     forward_auth authelia:${AUTHELIA_PORT} {
         uri /api/authz/forward-auth
         copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
     }
-
-    reverse_proxy wireguard:${OPENWEBUI_PORT} {
-        header_up Remote-Email {http.request.header.Remote-Email}
-        header_up Remote-Name {http.request.header.Remote-Name}
-        header_up Remote-User {http.request.header.Remote-User}
-        header_up Remote-Groups {http.request.header.Remote-Groups}
-    }
-}
-
-# -------- SEARXNG --------
-
-${SEARXNG_DOMAIN} {
-    forward_auth authelia:${AUTHELIA_PORT} {
-        uri /api/authz/forward-auth
-        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
-    }
-    reverse_proxy searxng:${SEARXNG_PORT}
+    reverse_proxy wireguard:${ACESTEP_PORT}
 }
 
 # -------- COMFYUI --------
@@ -121,24 +105,30 @@ ${COMFYUI_DOMAIN} {
     }
 }
 
-# -------- OPENCLAW --------
+# -------- OPEN WEBUI --------
 
-${OPENCLAW_DOMAIN} {
+${OPENWEBUI_DOMAIN} {
     forward_auth authelia:${AUTHELIA_PORT} {
         uri /api/authz/forward-auth
         copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
     }
-	reverse_proxy wireguard:18789
+
+    reverse_proxy wireguard:${OPENWEBUI_PORT} {
+        header_up Remote-Email {http.request.header.Remote-Email}
+        header_up Remote-Name {http.request.header.Remote-Name}
+        header_up Remote-User {http.request.header.Remote-User}
+        header_up Remote-Groups {http.request.header.Remote-Groups}
+    }
 }
 
-# -------- ACE STEP --------
+# -------- SEARXNG --------
 
-${ACESTEP_DOMAIN} {
+${SEARXNG_DOMAIN} {
     forward_auth authelia:${AUTHELIA_PORT} {
         uri /api/authz/forward-auth
         copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
     }
-    reverse_proxy wireguard:${ACESTEP_PORT}
+    reverse_proxy searxng:${SEARXNG_PORT}
 }
 
 # -------- FILE BROWSER --------
@@ -167,6 +157,16 @@ ${FILEBROWSER_RPI_DOMAIN} {
     reverse_proxy wireguard:${FILEBROWSER_RPI_PORT}
 }
 
+# -------- JELLYFIN --------
+
+${JELLYFIN_PC_DOMAIN} {
+    forward_auth authelia:${AUTHELIA_PORT} {
+        uri /api/authz/forward-auth
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+    }
+    reverse_proxy wireguard:${JELLYFIN_PC_PORT}
+}
+
 # -------- TORRENT --------
 
 ${TORRENT_PC_DOMAIN} {
@@ -184,4 +184,5 @@ ${TORRENT_RPI_DOMAIN} {
     }
     reverse_proxy wireguard:${TORRENT_RPI_PORT}
 }
+
 EOF

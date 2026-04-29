@@ -118,6 +118,28 @@ services:
       - postgres
       - guacd
 
+# -------- ACE STEP --------
+
+  acestep:
+    image: alpine/socat:1.8.0.3
+    container_name: acestep
+    restart: unless-stopped
+    network_mode: "service:wireguard"
+    depends_on:
+      - wireguard
+    command: TCP-LISTEN:${ACESTEP_PORT},fork,reuseaddr TCP:${ACESTEP_WIREGUARD_IP}:${ACESTEP_WIREGUARD_PORT}
+
+# -------- COMFY UI --------
+
+  comfyui:
+    image: alpine/socat:1.8.0.3
+    container_name: comfyui
+    restart: unless-stopped
+    network_mode: "service:wireguard"
+    depends_on:
+      - wireguard
+    command: TCP-LISTEN:${COMFYUI_PORT},fork,reuseaddr TCP:${COMFYUI_WIREGUARD_IP}:${COMFYUI_WIREGUARD_PORT}
+
 # -------- OPEN WEBUI --------
 
   openwebui:
@@ -141,8 +163,6 @@ services:
     volumes:
       - openwebui_data:/app/backend/data
 
-# -------- SEARXNG --------
-
   searxng:
     image: searxng/searxng:latest
     container_name: searxng
@@ -155,46 +175,6 @@ services:
       - SEARXNG_BASE_URL=https://searxng.${DOMAIN}/
     networks:
       - internal
-
-# -------- COMFY UI --------
-
-  comfyui:
-    image: alpine/socat:1.8.0.3
-    container_name: comfyui
-    restart: unless-stopped
-    network_mode: "service:wireguard"
-    depends_on:
-      - wireguard
-    command: TCP-LISTEN:${COMFYUI_PORT},fork,reuseaddr TCP:${COMFYUI_WIREGUARD_IP}:${COMFYUI_WIREGUARD_PORT}
-
-# -------- ACE STEP --------
-
-  acestep:
-    image: alpine/socat:1.8.0.3
-    container_name: acestep
-    restart: unless-stopped
-    network_mode: "service:wireguard"
-    depends_on:
-      - wireguard
-    command: TCP-LISTEN:${ACESTEP_PORT},fork,reuseaddr TCP:${ACESTEP_WIREGUARD_IP}:${ACESTEP_WIREGUARD_PORT}
-
-# -------- OPENCLAW --------
-
-  openclaw:
-    image: ghcr.io/openclaw/openclaw:latest
-    container_name: openclaw
-    restart: unless-stopped
-    depends_on:
-      - wireguard
-    network_mode: "service:wireguard"
-    environment:
-      - NODE_ENV=production
-      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_TOKEN}
-      - OLLAMA_HOST=http://${OLLAMA_WIREGUARD_IP}:${OLLAMA_WIREGUARD_PORT:-11434}
-      - GATEWAY_TRUSTED_PROXIES=172.18.0.0/16
-    volumes:
-      - ./openclaw:/home/node/.openclaw
-      - /etc/localtime:/etc/localtime:ro
 
 # -------- FILE BROWSER --------
 
@@ -232,6 +212,17 @@ services:
       - wireguard
     command: TCP-LISTEN:${FILEBROWSER_RPI_PORT},fork,reuseaddr TCP:${FILEBROWSER_RPI_WIREGUARD_IP}:${FILEBROWSER_RPI_WIREGUARD_PORT}
 
+# -------- JELLYFIN --------
+
+  jellyfin-pc:
+    image: alpine/socat:1.8.0.3
+    container_name: jellyfin-pc
+    restart: unless-stopped
+    network_mode: "service:wireguard"
+    depends_on:
+      - wireguard
+    command: TCP-LISTEN:${JELLYFIN_PC_PORT},fork,reuseaddr TCP:${JELLYFIN_PC_WIREGUARD_IP}:${JELLYFIN_PC_WIREGUARD_PORT}
+
 # -------- TORRENT --------
 
   torrent-padre:
@@ -261,17 +252,17 @@ services:
       context: ./dashboard/front
       dockerfile: Dockerfile
       args:
-        - VITE_FILEBROWSER_PC_DOMAIN=${FILEBROWSER_PC_DOMAIN}
-        - VITE_TORRENT_PC_DOMAIN=${TORRENT_PC_DOMAIN}
-        - VITE_FILEBROWSER_RPI_DOMAIN=${FILEBROWSER_RPI_DOMAIN}
-        - VITE_TORRENT_RPI_DOMAIN=${TORRENT_RPI_DOMAIN}
-        - VITE_FILEBROWSER_VPS_DOMAIN=${FILEBROWSER_VPS_DOMAIN}
         - VITE_PORTAINER_DOMAIN=${PORTAINER_DOMAIN}
         - VITE_GUACAMOLE_DOMAIN=${GUACAMOLE_DOMAIN}
+        - VITE_ACESTEP_DOMAIN=${ACESTEP_DOMAIN}
         - VITE_COMFYUI_DOMAIN=${COMFYUI_DOMAIN}
         - VITE_OPENWEBUI_DOMAIN=${OPENWEBUI_DOMAIN}
-        - VITE_OPENCLAW_DOMAIN=${OPENCLAW_DOMAIN}
-        - VITE_OPENCLAW_TOKEN=${OPENCLAW_TOKEN}
+        - VITE_FILEBROWSER_VPS_DOMAIN=${FILEBROWSER_VPS_DOMAIN}
+        - VITE_FILEBROWSER_PC_DOMAIN=${FILEBROWSER_PC_DOMAIN}
+        - VITE_FILEBROWSER_RPI_DOMAIN=${FILEBROWSER_RPI_DOMAIN}
+        - VITE_JELLYFIN_PC_DOMAIN=${JELLYFIN_PC_DOMAIN}
+        - VITE_TORRENT_PC_DOMAIN=${TORRENT_PC_DOMAIN}
+        - VITE_TORRENT_RPI_DOMAIN=${TORRENT_RPI_DOMAIN}
     networks:
       - internal
 

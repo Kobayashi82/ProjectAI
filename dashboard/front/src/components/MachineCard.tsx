@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react'
 import StatusBadge from './StatusBadge'
 import ActionButton from './ActionButton'
+import MachineIcon from './MachineIcon'
+import MetricItem from './MetricItem'
+import padreCover from '../assets/hero-padre.svg'
+import rpiCover from '../assets/hero-rpi.svg'
+import vpsCover from '../assets/hero-vps.svg'
 import { type ReactNode } from 'react'
 import { useAction } from '../hooks/useAction.js'
 import { useTelemetry } from '../hooks/useTelemetry.js'
@@ -25,6 +30,12 @@ interface GuacConnection {
 }
 
 type ConfirmAction = 'shutdown' | 'reboot' | null
+
+const COVER_BY_ID: Record<string, string> = {
+    pc: padreCover,
+    rpi: rpiCover,
+    vps: vpsCover,
+}
 
 const formatPercent = (value: number, decimals = 1) => `${value.toFixed(decimals)}%`
 
@@ -69,7 +80,17 @@ const TelemetryRow = ({
     </div>
 )
 
-const ServiceButton = ({ label, url, disabled }: { label: string; url: string; disabled: boolean }) => (
+const ServiceButton = ({
+    label,
+    url,
+    disabled,
+    className = '',
+}: {
+    label: string
+    url: string
+    disabled: boolean
+    className?: string
+}) => (
     <button
         type="button"
         onClick={(event) => {
@@ -77,9 +98,8 @@ const ServiceButton = ({ label, url, disabled }: { label: string; url: string; d
             window.open(url, '_blank', 'noopener,noreferrer')
         }}
         disabled={disabled}
-        className="btn-service disabled:opacity-30 disabled:cursor-not-allowed"
+        className={`btn-service disabled:opacity-30 disabled:cursor-not-allowed ${className}`}
     >
-        <span className="text-accent/40">›</span>
         {label}
     </button>
 )
@@ -101,6 +121,7 @@ const toHttpsUrl = (domain: string | undefined, key: string, path = '') => {
 // ─── Links estáticos (Files, servicios, AI) ───────────────────────────────────
 const SERVICE_LINKS: Record<string, { label: string; url: string }[]> = {
     pc:  [{ label: 'Files',     url: toHttpsUrl(import.meta.env.VITE_FILEBROWSER_PC_DOMAIN, 'VITE_FILEBROWSER_PC_DOMAIN') },
+		{ label: 'Jellyfin',   url: toHttpsUrl(import.meta.env.VITE_JELLYFIN_PC_DOMAIN, 'VITE_JELLYFIN_PC_DOMAIN') },
         { label: 'Torrent',   url: toHttpsUrl(import.meta.env.VITE_TORRENT_PC_DOMAIN, 'VITE_TORRENT_PC_DOMAIN') }],
     rpi: [{ label: 'Files',     url: toHttpsUrl(import.meta.env.VITE_FILEBROWSER_RPI_DOMAIN, 'VITE_FILEBROWSER_RPI_DOMAIN') },
         { label: 'Torrent',   url: toHttpsUrl(import.meta.env.VITE_TORRENT_RPI_DOMAIN, 'VITE_TORRENT_RPI_DOMAIN') }],
@@ -113,14 +134,14 @@ const AI_LINKS: Record<string, { label: string; url: string }[]> = {
 		{ label: 'Ace Step',   url: toHttpsUrl(import.meta.env.VITE_ACESTEP_DOMAIN, 'VITE_ACESTEP_DOMAIN') },
         { label: 'ComfyUI',    url: toHttpsUrl(import.meta.env.VITE_COMFYUI_DOMAIN, 'VITE_COMFYUI_DOMAIN') },
         { label: 'Open WebUI', url: toHttpsUrl(import.meta.env.VITE_OPENWEBUI_DOMAIN, 'VITE_OPENWEBUI_DOMAIN') },
-        {
-            label: 'OpenClaw',
-            url: toHttpsUrl(
-                import.meta.env.VITE_OPENCLAW_DOMAIN,
-                'VITE_OPENCLAW_DOMAIN',
-                `/#token=${requiredEnv(import.meta.env.VITE_OPENCLAW_TOKEN, 'VITE_OPENCLAW_TOKEN')}`,
-            ),
-        },
+        // {
+        //     label: 'OpenClaw',
+        //     url: toHttpsUrl(
+        //         import.meta.env.VITE_OPENCLAW_DOMAIN,
+        //         'VITE_OPENCLAW_DOMAIN',
+        //         `/#token=${requiredEnv(import.meta.env.VITE_OPENCLAW_TOKEN, 'VITE_OPENCLAW_TOKEN')}`,
+        //     ),
+        // },
     ],
 }
 
@@ -153,6 +174,11 @@ export default function MachineCard({
 }: MachineCardProps) {
     const [confirmAction, setConfirmAction]   = useState<ConfirmAction>(null)
     const [showCommands, setShowCommands]     = useState(false)
+    const [showTelemetry, setShowTelemetry]   = useState(false)
+    const [showPower, setShowPower]           = useState(false)
+    const [showAccess, setShowAccess]         = useState(false)
+    const [showServices, setShowServices]     = useState(false)
+    const [showAi, setShowAi]                 = useState(false)
     const [commands, setCommands]             = useState<string[]>([])
     const [cmdLoading, setCmdLoading]         = useState(false)
     const [executingCmd, setExecutingCmd]     = useState<string | null>(null)
@@ -166,6 +192,7 @@ export default function MachineCard({
 
     const serviceLinks = (SERVICE_LINKS[id] ?? []).filter((link) => Boolean(link.url))
     const aiLinks      = (AI_LINKS[id] ?? []).filter((link) => Boolean(link.url))
+    const coverImage   = COVER_BY_ID[id] ?? padreCover
 
     // ─── Cargar conexiones Guacamole ──────────────────────────────────────────
     useEffect(() => {
@@ -218,33 +245,58 @@ export default function MachineCard({
     }
 
     return (
-        <div className="terminal-border bg-surface-card p-6 flex flex-col gap-5 transition-all duration-300">
-            {/* Header */}
-            <div className="flex items-start justify-between">
-                <div>
-                    <div className="text-xs text-accent/40 tracking-[0.3em] uppercase mb-1">{subtitle}</div>
-                    <h2 className="text-xl font-bold tracking-widest uppercase glow">{label}</h2>
+        <div className="machine-card group flex flex-col gap-4">
+            {/* <div
+                className="h-28 w-full rounded-xl overflow-hidden border border-surface-border/50 bg-cover bg-center"
+                style={{ backgroundImage: `url(${coverImage})` }}
+            /> */}
+            {/* Header con Icono */}
+            <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-4 flex-1 min-w-0">
+                    {/* Machine Icon */}
+                    <div className="flex-shrink-0 opacity-80 group-hover:opacity-100 transition-opacity duration-300 scale-90 -mr-2 -translate-y-2">
+                        <MachineIcon machine={id as 'pc' | 'rpi' | 'vps'} size="md" />
+                    </div>
+                    {/* Title and Subtitle */}
+                    <div className="flex-1 min-w-0">
+                        <div className="text-[10px] text-accent/40 tracking-widest uppercase font-semibold mb-1">{subtitle}</div>
+                        {/* <h2 className="text-xl font-black tracking-wider uppercase glow truncate">{label}</h2> */}
+						<h2 className="text-xl font-black tracking-wider uppercase truncate">{label}</h2>
+                    </div>
                 </div>
-                <StatusBadge online={online} loading={statusLoading} />
+                {/* Status Badge */}
+                <div className="flex-shrink-0">
+                    <StatusBadge online={online} loading={statusLoading} />
+                </div>
             </div>
 
-            {/* Power */}
+            {/* Power Controls */}
             {(canWake || canShutdown || canReboot) && (
                 <>
-                    <div className="border-t border-surface-border" />
+                    <div className="border-t border-surface-border/50" />
                     <div>
-                        <div className="text-xs text-accent/30 tracking-[0.25em] uppercase mb-3">// power</div>
-                        <div className="flex flex-wrap gap-2">
-                            {canWake && (
-                                <ActionButton label="Wake" onClick={wake.execute} loading={wake.loading} disabled={online} />
-                            )}
-                            {canShutdown && (
-                                <ActionButton label="Shutdown" onClick={() => setConfirmAction('shutdown')} loading={shutdown.loading} disabled={!online} danger />
-                            )}
-                            {canReboot && (
-                                <ActionButton label="Reboot" onClick={() => setConfirmAction('reboot')} loading={reboot.loading} disabled={!online} danger />
-                            )}
-                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setShowPower(!showPower)}
+                            className="w-full text-xs font-bold text-accent/50 tracking-widest uppercase mb-3 flex items-center gap-2 hover:text-accent/70 transition-colors"
+                        >
+                            <span className="text-accent text-base">⚡</span>
+                            <span>Power</span>
+                            {/* <span className="text-[10px] opacity-50">{showPower ? '▼' : '▶'}</span> */}
+                        </button>
+                        {showPower && (
+                            <div className="flex flex-wrap gap-2">
+                                {canWake && (
+                                    <ActionButton label="Wake" onClick={wake.execute} loading={wake.loading} disabled={online} />
+                                )}
+                                {canShutdown && (
+                                    <ActionButton label="Shutdown" onClick={() => setConfirmAction('shutdown')} loading={shutdown.loading} disabled={!online} danger />
+                                )}
+                                {canReboot && (
+                                    <ActionButton label="Reboot" onClick={() => setConfirmAction('reboot')} loading={reboot.loading} disabled={!online} danger />
+                                )}
+                            </div>
+                        )}
                     </div>
                 </>
             )}
@@ -252,14 +304,24 @@ export default function MachineCard({
             {/* Access (Guacamole) */}
             {accessLinks.length > 0 && (
                 <>
-                    <div className="border-t border-surface-border" />
+                    <div className="border-t border-surface-border/50" />
                     <div>
-                        <div className="text-xs text-accent/30 tracking-[0.25em] uppercase mb-3">// access</div>
-                        <div className="flex flex-wrap gap-2">
-                            {accessLinks.map(c => (
-                                <ServiceButton key={c.url} label={c.type} url={c.url} disabled={!online} />
-                            ))}
-                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setShowAccess(!showAccess)}
+                            className="w-full text-xs font-bold text-accent/50 tracking-widest uppercase mb-3 flex items-center gap-2 hover:text-accent/70 transition-colors"
+                        >
+                            <span className="text-accent text-base">🗝️</span>
+                            <span>Access</span>
+                            {/* <span className="text-[10px] opacity-50">{showAccess ? '▼' : '▶'}</span> */}
+                        </button>
+                        {showAccess && (
+                            <div className="flex flex-wrap gap-2">
+                                {accessLinks.map(c => (
+                                    <ServiceButton key={c.url} label={c.type} url={c.url} disabled={!online} className="btn-service-services" />
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </>
             )}
@@ -267,14 +329,24 @@ export default function MachineCard({
             {/* Services */}
             {serviceLinks.length > 0 && (
                 <>
-                    <div className="border-t border-surface-border" />
+                    <div className="border-t border-surface-border/50" />
                     <div>
-                        <div className="text-xs text-accent/30 tracking-[0.25em] uppercase mb-3">// services</div>
-                        <div className="flex flex-wrap gap-2">
-                            {serviceLinks.map(svc => (
-                                <ServiceButton key={svc.url} label={svc.label} url={svc.url} disabled={!online} />
-                            ))}
-                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setShowServices(!showServices)}
+                            className="w-full text-xs font-bold text-accent/50 tracking-widest uppercase mb-3 flex items-center gap-2 hover:text-accent/70 transition-colors"
+                        >
+                            <span className="text-accent text-base">✨</span>
+                            <span>Services</span>
+                            {/* <span className="text-[10px] opacity-50">{showServices ? '▼' : '▶'}</span> */}
+                        </button>
+                        {showServices && (
+                            <div className="flex flex-wrap gap-2">
+                                {serviceLinks.map(svc => (
+                                    <ServiceButton key={svc.url} label={svc.label} url={svc.url} disabled={!online} className="btn-service-ai" />
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </>
             )}
@@ -282,130 +354,83 @@ export default function MachineCard({
             {/* AI */}
             {aiLinks.length > 0 && (
                 <>
-                    <div className="border-t border-surface-border" />
+                    <div className="border-t border-surface-border/50" />
                     <div>
-                        <div className="text-xs text-accent/30 tracking-[0.25em] uppercase mb-2">// ai</div>
-                        <div className="flex flex-wrap gap-2">
-                            {aiLinks.map(svc => (
-                                <ServiceButton key={svc.url} label={svc.label} url={svc.url} disabled={!online} />
-                            ))}
-                        </div>
-                    </div>
-                </>
-            )}
-
-            {/* Telemetry */}
-            {telemetry && online && tel && (
-                <>
-                    <div className="border-t border-surface-border" />
-                    <div>
-                        <div className="text-xs text-accent/30 tracking-[0.25em] uppercase mb-3">// telemetry</div>
-                        <div className="flex flex-col text-xs font-mono tabular-nums">
-                            <TelemetryRow
-                                label="cpu"
-                                value={formatPercent(tel.sistema.cpu_uso_porcentaje)}
-                                valueClassName={usageColor(tel.sistema.cpu_uso_porcentaje)}
-                                right={tel.sistema.temperatura_cpu ?? '—'}
-                            />
-                            <Bar value={tel.sistema.cpu_uso_porcentaje} />
-                            <TelemetryRow
-                                label="ram"
-                                value={formatPercent(tel.sistema.ram.porcentaje)}
-                                valueClassName={usageColor(tel.sistema.ram.porcentaje)}
-                                right={`${tel.sistema.ram.usado_gb.toFixed(1)} / ${tel.sistema.ram.total_gb.toFixed(1)} GB`}
-                            />
-                            <Bar value={tel.sistema.ram.porcentaje} />
-                            {tel.gpus?.map((gpu, i) => {
-                                const gpuUsage = parseFloat(gpu.uso)
-                                const vramPercent = Math.round((parseFloat(gpu.vram_uso) / parseFloat(gpu.vram_total)) * 100)
-                                return (
-                                    <div key={i}>
-                                        <TelemetryRow
-                                            label={`gpu${tel.gpus!.length > 1 ? ` ${i + 1}` : ''}`}
-                                            value={formatPercentFromString(gpu.uso)}
-                                            valueClassName={usageColor(gpuUsage)}
-                                            right={gpu.temp}
-                                        />
-                                        <Bar value={gpuUsage} />
-                                        <TelemetryRow
-                                            label="vram"
-                                            value={formatPercent(vramPercent)}
-                                            valueClassName={usageColor(vramPercent)}
-                                            right={`${gpu.vram_uso} / ${gpu.vram_total}`}
-                                        />
-                                        <Bar value={vramPercent} />
-                                    </div>
-                                )
-                            })}
-                            {Object.entries(tel.discos).map(([mount, disk]) => {
-                                const pct = parseFloat(disk.porcentaje)
-                                return (
-                                    <div key={mount}>
-                                        <TelemetryRow
-                                            label={mount}
-                                            value={formatPercent(pct)}
-                                            valueClassName={usageColor(pct)}
-                                            right={`${disk.usado} / ${disk.total}`}
-                                        />
-                                        <Bar value={pct} />
-                                    </div>
-                                )
-                            })}
-                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setShowAi(!showAi)}
+                            className="w-full text-xs font-bold text-accent/50 tracking-widest uppercase mb-3 flex items-center gap-2 hover:text-accent/70 transition-colors"
+                        >
+                            <span className="text-accent text-base">🪄</span>
+                            <span>AI</span>
+                            {/* <span className="text-[10px] opacity-50">{showAi ? '▼' : '▶'}</span> */}
+                        </button>
+                        {showAi && (
+                            <div className="flex flex-wrap gap-2">
+                                {aiLinks.map(svc => (
+                                    <ServiceButton key={svc.url} label={svc.label} url={svc.url} disabled={!online} className="btn-service-access" />
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </>
             )}
 
             {/* Remote Commands */}
-            {id === 'pc' && online && (
-                <>
-                    <div className="border-t border-surface-border" />
-                    <div className="flex flex-col gap-3">
-                        <div className="flex items-center justify-between">
-                            <div
-                                className="text-xs text-accent/30 tracking-[0.25em] uppercase cursor-pointer hover:text-accent/60 flex items-center gap-2"
-                                onClick={toggleCommands}
-                            >
-                                <span>// commands</span>
-                                <span className="text-[10px] opacity-50">{showCommands ? '▼' : '▶'}</span>
-                            </div>
-                            <button
-                                onClick={fetchCommands}
-                                disabled={cmdLoading}
-                                aria-label="refresh commands"
-                                title="Refresh commands"
-                                className="btn-refresh"
-                            >
-                                <svg
-                                    viewBox="0 0 24 24"
-                                    aria-hidden="true"
-                                    className={`h-4 w-4 ${cmdLoading ? 'animate-spin' : ''}`}
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <path d="M20 11a8 8 0 1 0-2.34 5.66" />
-                                    <path d="M20 4v7h-7" />
-                                </svg>
-                            </button>
-                        </div>
+			{id === 'pc' && online && (
+				<>
+					<div className="border-t border-surface-border/50" />
+					<div>
+						<div className="flex items-center justify-between mb-3">
+							<button
+								type="button"
+								onClick={toggleCommands}
+								className="w-full text-xs font-bold text-accent/50 tracking-widest uppercase hover:text-accent/70 flex items-center gap-2 transition-colors"
+							>
+								<span className="text-accent text-base">📲</span>
+								<span>Commands</span>
+								{/* <span className="text-[10px] opacity-50">{showCommands ? '▼' : '▶'}</span> */}
+							</button>
+							{showCommands && (
+								<button
+									onClick={fetchCommands}
+									disabled={cmdLoading}
+									aria-label="refresh commands"
+									title="Refresh commands"
+									className="btn-refresh"
+								>
+									<svg
+										viewBox="0 0 24 24"
+										aria-hidden="true"
+										className={`h-4 w-4 ${cmdLoading ? 'animate-spin' : ''}`}
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2"
+										strokeLinecap="round"
+										strokeLinejoin="round"
+									>
+										<path d="M20 11a8 8 0 1 0-2.34 5.66" />
+										<path d="M20 4v7h-7" />
+									</svg>
+								</button>
+							)}
+						</div>
                         {showCommands && (
-                            <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-2 custom-scrollbar animate-in fade-in slide-in-from-top-1">
+                            <div className="cmd-grid animate-fade-in-up">
                                 {commands.map(cmd => (
                                     <div
                                         key={cmd}
-                                        className="flex items-center justify-between p-1 px-2 bg-surface-base/30 border border-surface-border/50 hover:border-accent/30 group"
+                                        className="cmd-item group"
                                     >
-                                        <span className="text-[10px] font-mono text-accent/40 truncate uppercase">{cmd}</span>
+                                        <span className="cmd-name">{cmd}</span>
                                         <button
                                             onClick={() => handleExecute(cmd)}
                                             disabled={executingCmd !== null}
-                                            className="text-[9px] text-accent/30 opacity-0 group-hover:opacity-100 group-hover:text-accent/60 transition-all disabled:opacity-30 flex items-center justify-center"
+                                            className="cmd-run disabled:opacity-40"
+                                            aria-label={`Run ${cmd}`}
                                         >
                                             {executingCmd === cmd ? (
-                                                '...'
+                                                <span className="text-[9px] tracking-wider">...</span>
                                             ) : (
                                                 <svg
                                                     viewBox="0 0 24 24"
@@ -421,9 +446,77 @@ export default function MachineCard({
                                 ))}
                             </div>
                         )}
-                    </div>
-                </>
-            )}
+					</div>
+				</>
+			)}
+                {/* Telemetry - Enhanced */}
+                {telemetry && online && tel && (
+                    <>
+                        <div className="border-t border-surface-border/50" />
+                        <div>
+                            <button
+                                type="button"
+                                onClick={() => setShowTelemetry(!showTelemetry)}
+                                className="w-full text-xs font-bold text-accent/50 tracking-widest uppercase mb-4 flex items-center gap-2 hover:text-accent/70 transition-colors"
+                            >
+                                <span className="text-accent text-base">📡</span>
+                                <span>Telemetry</span>
+                                {/* <span className="text-[10px] opacity-50">{showTelemetry ? '▼' : '▶'}</span> */}
+                            </button>
+                            {showTelemetry && (
+                                <div className="space-y-5">
+                                    {/* CPU Metrics */}
+                                    <MetricItem
+                                        label="CPU"
+                                        value={tel.sistema.cpu_uso_porcentaje}
+                                        unit="%"
+                                        temp={tel.sistema.temperatura_cpu}
+                                    />
+
+                                    {/* RAM Metrics */}
+                                    <MetricItem
+                                        label="Memory"
+                                        value={tel.sistema.ram.usado_gb}
+                                        max={tel.sistema.ram.total_gb}
+                                        displayText={`${tel.sistema.ram.usado_gb.toFixed(1)} GB / ${tel.sistema.ram.total_gb.toFixed(1)} GB`}
+                                    />
+
+                                    {/* GPU Metrics */}
+                                    {tel.gpus?.map((gpu, i) => {
+                                        const vramPercent = (parseFloat(gpu.vram_uso) / parseFloat(gpu.vram_total)) * 100
+                                        return (
+                                            <div key={i} className="space-y-3">
+                                                <MetricItem
+                                                    label={`GPU ${tel.gpus!.length > 1 ? i + 1 : ''}`}
+                                                    value={parseFloat(gpu.uso)}
+                                                    unit="%"
+                                                    temp={gpu.temp}
+                                                />
+
+                                                <MetricItem
+                                                    label="VRAM"
+                                                    value={vramPercent}
+                                                    displayText={`${gpu.vram_uso} / ${gpu.vram_total}`}
+                                                />
+                                            </div>
+                                        )
+                                    })}
+
+                                    {/* Storage Metrics */}
+                                    {Object.entries(tel.discos).map(([mount, disk]) => (
+                                        <MetricItem
+                                            key={mount}
+                                            label={mount}
+                                            value={parseFloat(disk.porcentaje)}
+                                            unit="%"
+                                            displayText={`${disk.usado} / ${disk.total}`}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </>
+                )}
 
             {/* Confirm modal */}
             {confirmAction && (

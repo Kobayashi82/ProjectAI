@@ -1,39 +1,56 @@
+import { useEffect, useState } from "react";
 import { useStatus } from "../hooks/useStatus";
 import MachineCard from "../components/MachineCard";
 
 export default function Dashboard() {
 	const { status, loading } = useStatus()
+	const [timestamp, setTimestamp] = useState({ date: '', time: '' })
 
-	const now = new Date()
-	const timestamp = now.toLocaleString('es-ES', {
-		timeZone: 'Europe/Madrid',
-		year: 'numeric',
-		month: '2-digit',
-		day: '2-digit',
-		hour: '2-digit',
-		minute: '2-digit',
-		hour12: false,
-	}).replace(',', '')
+	useEffect(() => {
+		const updateTime = () => {
+			const now = new Date()
+			const date = now.toLocaleDateString('es-ES', {
+				timeZone: 'Europe/Madrid',
+				year: 'numeric',
+				month: '2-digit',
+				day: '2-digit',
+			})
+			const time = now.toLocaleTimeString('es-ES', {
+				timeZone: 'Europe/Madrid',
+				hour: '2-digit',
+				minute: '2-digit',
+				second: '2-digit',
+				hour12: false,
+			})
+			setTimestamp({ date, time })
+		}
+
+		updateTime()
+		const intervalId = setInterval(updateTime, 1000)
+		return () => clearInterval(intervalId)
+	}, [])
 
 	return (
-		<div className="min-h-screen p-6 flex flex-col gap-6">
+		<div className="min-h-screen bg-gradient-to-b from-surface-base via-surface-card to-surface-base p-8 flex flex-col gap-8">
 			{/* -- Header */}
-			<header className="flex items-center justify-between border-b border-surface-border pb-4">
-				<div>
-					<div className="text-accent/40 text-xs tracking-[0.4em] uppercase mb-1">system</div>
-					<h1 className="text-2xl font-bold tracking-[0.3em] uppercase glow">Dashboard<span className="text-accent/40"></span></h1>
+			<header className="mb-4">
+				<div className="flex items-start justify-between gap-4">
+					<h1 className="text-3xl md:text-4xl font-black tracking-tighter uppercase glow bg-clip-text text-transparent bg-gradient-to-r from-accent to-accent/60">
+						Dashboard
+					</h1>
+					<div className="text-right space-y-1 text-xs">
+						<div className="text-accent/40 tracking-widest font-mono font-bold">{timestamp.date}</div>
+						<div className="text-accent/40 tracking-widest font-mono font-bold">{timestamp.time}</div>
+					</div>
 				</div>
-				<div className="text-right">
-					<div className="text-xs text-accent/30 tracking-widest">{timestamp}</div>
-					<div className="text-xs text-accent/20 tracking-widest mt-0.5">Project AI</div>
-				</div>
+				<div className="h-px bg-gradient-to-r from-accent/20 via-accent/10 to-transparent mt-6" />
 			</header>
 
-			{/* -- Machine cards */}
-			<main className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
+			{/* -- Main Content */}
+			<main className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 				<MachineCard
 					id="pc"
-					label="Padre"
+					label="PADRE"
 					subtitle="windows // x86_64"
 					online={status?.pc.online ?? false}
 					statusLoading={loading}
@@ -63,13 +80,15 @@ export default function Dashboard() {
 			</main>
 
 			{/* -- Footer */}
-			<footer className="border-t border-surface-border pt-3 flex items-center justify-between">
-				<span className="text-xs text-accent/20 tracking-widest">
-					Kobayashi Corp. 2026
-				</span>
-				<span className="text-xs text-accent/20 tracking-widest">
-					v1.0
-				</span>
+			<footer className="border-t border-surface-border/50 pt-6 flex items-center justify-between mt-auto">
+				<div className="space-y-1">
+					<span className="text-xs text-accent/40 tracking-widest font-mono block">
+						Kobayashi Corp. 2026
+					</span>
+				</div>
+				<div className="text-right text-xs text-accent/30 font-mono tracking-wider">
+					Project AI • v1.0
+				</div>
 			</footer>
 		</div>
 	)

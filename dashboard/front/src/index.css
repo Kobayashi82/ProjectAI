@@ -9,14 +9,18 @@
 
 	body {
 		@apply bg-surface-base text-accent font-mono;
+		background: linear-gradient(135deg, #0a0e0f 0%, #0f1419 50%, #0a0e0f 100%);
+		background-attachment: fixed;
 		background-image:
-			/* Subtle grid pattern for terminal feel */
-			linear-gradient(rgba(0, 255, 157, 0.03) 1px, transparent 1px),
-			linear-gradient(90deg, rgba(0, 255, 157, 0.03) 1px, transparent 1px);
-		background-size: 32px 32px;
+			radial-gradient(circle at 20% 50%, rgba(0, 255, 157, 0.05) 0%, transparent 50%),
+			radial-gradient(circle at 80% 80%, rgba(76, 154, 255, 0.03) 0%, transparent 50%),
+			/* Subtle grid pattern for professional feel */
+			linear-gradient(rgba(0, 255, 157, 0.02) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(0, 255, 157, 0.02) 1px, transparent 1px);
+		background-size: 100%, 100%, 32px 32px, 32px 32px;
 	}
 
-	/* -- Scanline overlay effect */
+	/* -- Scanline overlay effect - more subtle */
 	body::after {
 		content: '';
 		position: fixed;
@@ -25,8 +29,8 @@
 			0deg,
 			transparent,
 			transparent 2px,
-			rgba(0, 0, 0, 0.08) 2px,
-			rgba(0, 0, 0, 0.08) 4px
+			rgba(0, 0, 0, 0.03) 2px,
+			rgba(0, 0, 0, 0.03) 4px
 		);
 		pointer-events: none;
 		z-index: 9999;
@@ -51,63 +55,126 @@
 
 @layer components {
 	.terminal-border {
-		@apply border border-surface-border;
-		box-shadow: 0 0 0 1px rgba(0, 255, 157, 0.05), inset 0 0 20px rgba(0, 255, 157, 0.02);
+		@apply border border-surface-border transition-all duration-300;
+		box-shadow: 
+			0 0 0 1px rgba(0, 255, 157, 0.05),
+			inset 0 0 20px rgba(0, 255, 157, 0.01),
+			0 10px 40px rgba(0, 0, 0, 0.3);
 	}
 
 	.terminal-border:hover {
 		@apply border-accent/20;
-		box-shadow: 0 0 0 1px rgba(0, 255, 157, 0.1), inset 0 0 20px rgba(0, 255, 157, 0.04);
+		box-shadow: 
+			0 0 0 1px rgba(0, 255, 157, 0.15),
+			inset 0 0 20px rgba(0, 255, 157, 0.05),
+			0 20px 60px rgba(0, 255, 157, 0.1);
+		transform: translateY(-2px);
+	}
+
+	.machine-card {
+		@apply terminal-border bg-gradient-to-br from-surface-card to-surface-base p-6;
+		border-radius: 12px;
 	}
 
 	.glow {
-		text-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
+		text-shadow: 0 0 15px rgba(0, 255, 157, 0.6), 0 0 30px rgba(0, 255, 157, 0.3);
+		font-weight: 700;
+	}
+
+	.glow-subtle {
+		text-shadow: 0 0 8px rgba(0, 255, 157, 0.3);
 	}
 
 	.btn-action {
-		@apply px-3 py-1.5 text-[10px] font-mono tracking-widest uppercase
-			border border-surface-border bg-surface-card
-			text-accent/70 transition-all duration-150
-			cursor-pointer;
+		@apply px-4 py-2 text-[11px] font-mono tracking-wider uppercase
+			border border-accent/40 bg-gradient-to-r from-accent/5 to-accent/0
+			text-accent/80 transition-all duration-200
+			cursor-pointer rounded-md font-semibold shadow-lg;
 		-webkit-tap-highlight-color: transparent;
 		touch-action: manipulation;
 	}
 
 	.btn-action-danger {
-		@apply btn-action border-red-900/50 text-red-400/70;
+		@apply btn-action border-red-500/40 text-red-400/80 from-red-500/5 to-red-500/0;
 	}
 
 	.btn-service {
-		@apply px-2 py-1.5 text-[10px] font-mono tracking-widest uppercase
-			border border-surface-border bg-surface-card
-			text-accent/60 transition-all duration-150
-			cursor-pointer flex items-center gap-2;
+		@apply px-3 py-2 text-[10px] font-mono tracking-widest uppercase
+			border border-accent/30 bg-accent/5
+			text-accent/70 transition-all duration-150
+			cursor-pointer flex items-center gap-2 rounded-md;
 		-webkit-tap-highlight-color: transparent;
 		touch-action: manipulation;
 	}
 
+	.btn-service-access {
+		@apply border-sky-400/40 text-sky-300/80 bg-sky-400/5;
+	}
+
+	.btn-service-services {
+		@apply border-emerald-400/40 text-emerald-300/80 bg-emerald-400/5;
+	}
+
+	.btn-service-ai {
+		@apply border-violet-400/40 text-violet-300/80 bg-violet-400/5;
+	}
+
 	.btn-refresh {
-		@apply inline-flex items-center justify-center p-1.5 text-accent/30 transition-colors duration-150
-			cursor-pointer;
+		@apply inline-flex items-center justify-center p-2 text-accent/40 transition-all duration-200
+			cursor-pointer rounded-md hover:bg-accent/5;
 		-webkit-tap-highlight-color: transparent;
 		touch-action: manipulation;
+	}
+
+	.cmd-grid {
+		@apply grid grid-cols-1 sm:grid-cols-2 gap-2 overflow-y-auto pr-2 custom-scrollbar;
+		max-height: 13.25rem;
+	}
+
+	.cmd-item {
+		@apply flex items-center justify-between gap-2 px-2 py-2 rounded-md h-9
+			border border-surface-border/60
+			bg-gradient-to-r from-surface-base/50 via-surface-base/20 to-transparent
+			transition-all duration-200;
+		box-shadow: inset 0 0 0 1px rgba(0, 255, 157, 0.03);
+	}
+
+	.cmd-item:hover {
+		@apply border-accent/30 bg-accent/5;
+	}
+
+	.cmd-name {
+		@apply text-[10px] font-mono text-accent/50 uppercase tracking-widest truncate;
+	}
+
+	.cmd-run {
+		@apply h-6 w-6 inline-flex items-center justify-center rounded border border-accent/30
+			text-accent/40 bg-surface-base/60 transition-all;
+	}
+
+	.cmd-run:hover {
+		@apply text-accent/70 border-accent/50 bg-accent/10;
 	}
 
 	@media (hover: hover) and (pointer: fine) {
 		.btn-action:hover {
-			@apply border-accent/40 text-accent bg-accent-muted;
+			@apply border-accent text-accent bg-accent/10 shadow-glow;
 		}
 
 		.btn-action-danger:hover {
-			@apply border-red-500/60 text-red-400 bg-red-500/10;
+			@apply border-red-500 text-red-300 bg-red-500/15;
 		}
 
 		.btn-service:hover {
-			@apply border-accent/30 text-accent bg-accent-muted;
+			@apply border-accent/50 text-accent bg-accent/10;
 		}
 
 		.btn-refresh:hover {
-			@apply text-accent/60;
+			@apply text-accent/80;
+		}
+
+		.cmd-item:hover {
+			@apply shadow-glow;
 		}
 
 		.btn-action:active,
@@ -116,4 +183,57 @@
 			transform: scale(0.95);
 		}
 	}
+
+	/* -- Section heading enhancement */
+	h3 {
+		@apply font-mono;
+	}
+
+	/* -- Custom scrollbar styling */
+	.custom-scrollbar::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-track {
+		@apply bg-surface-base/20;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-thumb {
+		@apply bg-accent/30 rounded;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+		@apply bg-accent/50;
+	}
+
+	/* -- Fade and slide animations */
+	@keyframes fadeInUp {
+		from {
+			opacity: 0;
+			transform: translateY(10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.animate-fade-in-up {
+		animation: fadeInUp 0.5s ease-out;
+	}
+
+	/* -- Glow effects for important elements */
+	.shadow-glow {
+		box-shadow: 0 0 20px rgba(0, 255, 157, 0.3), 0 0 40px rgba(0, 255, 157, 0.1) !important;
+	}
+
+	/* -- Status indicator badge */
+	.status-online {
+		@apply bg-emerald-500/10 border-emerald-500/30;
+	}
+
+	.status-offline {
+		@apply bg-red-500/10 border-red-500/30;
+	}
 }
+

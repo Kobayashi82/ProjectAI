@@ -12,7 +12,6 @@ import ServiceFrame from './pages/ServiceFrame.js'
 //     vnc: `https://${import.meta.env.VITE_GUACAMOLE_DOMAIN}/#/client/pc-vnc`,
 //     openwebui: `https://${import.meta.env.VITE_OPENWEBUI_DOMAIN}`,
 //     comfyui: `https://${import.meta.env.VITE_COMFYUI_DOMAIN}`,
-//     openclaw: `https://${import.meta.env.VITE_OPENCLAW_DOMAIN}`,
 // 	acestep: `https://${import.meta.env.VITE_ACESTEP_DOMAIN}`,
 // }
 
@@ -26,9 +25,8 @@ export default function App() {
 			<Route path="/vnc" element={<ServiceFrame url={SERVICES.vnc} title="VNC // PC" />} />
 			<Route path="/openwebui" element={<ServiceFrame url={SERVICES.openwebui} title="Open WebUI" />} />
 			<Route path="/comfyui" element={<ServiceFrame url={SERVICES.comfyui} title="ComfyUI" />} />
-			<Route path="/openclaw" element={<ServiceFrame url={SERVICES.openclaw} title="OpenClaw" />} />
-			<Route path="/acestep" element={<ServiceFrame url={SERVICES.acestep} title="ACE STEP" />}
-			/> */}
+			<Route path="/acestep" element={<ServiceFrame url={SERVICES.acestep} title="ACE STEP" />} */}
+			{/* /> */}
 		</Routes>
 	)
 }
