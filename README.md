@@ -136,7 +136,7 @@ make restart
 |-------|-----------------------------------------------------------------------------------|
 | `VPS` | *Hetzner CPX32 — 4 vCPU AMD compartidas, 8GB RAM, Ubuntu*                         |
 | `RPI` | *Raspberry Pi 3B+ — ARM Cortex-A53 1.4GHz, 1GB RAM, Raspberry Pi OS*              |
-| `PC`  | *Ryzen 7 7800X3D 8-cores RTX 4070 Super 12GB VRAM, 64GB DDR5 6000MHz, Windows 11* |
+| `PC`  | *Ryzen 7 7800X3D 8-cores, RTX 4070 Super 12GB VRAM, 64GB DDR5 6000MHz, Windows 11* |
 |
 
 | SERVICIO            | NODO | URL                         | PUERTO | DESCRIPCIÓN                                    |
