@@ -17,7 +17,7 @@
 `Project AI` es una plataforma centralizada de servicios alojada en un `VPS` con `Docker`. Proporciona acceso unificado a servicios de IA, streaming multimedia, operaciones remotas y monitorizacion en tiempo real.
 
 > [!WARNING]
-> Esto es un proyecto personal yuede contener errores o funciones incompletas. Úsalo bajo tu propia responsabilidad.
+> Esto es un proyecto personal y puede contener errores o funciones incompletas. Úsalo bajo tu propia responsabilidad.
 
 ## Tabla de Contenidos
 
