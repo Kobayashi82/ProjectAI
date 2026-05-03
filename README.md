@@ -119,9 +119,7 @@ Añadir al archivo `wireguard/wg_confs/wg0.conf` en la sección `[Interface]`
 
 ```bash
 PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; iptables -t nat -A POSTROUTING -o eth+ -j MASQUERADE; iptables -t nat -A PREROUTING -i eth+ -p udp --dport 51820 -j RETURN; iptables -t nat -A PREROUTING -i eth+ -p tcp --dport 4000 -j REDIRECT --to-ports 4000; iptables -t nat -A PREROUTING -i eth+ -p tcp --dport 4822 -j REDIRECT --to-ports 4822; iptables -t nat -A PREROUTING -i eth+ -p tcp --dport 8081 -j REDIRECT --to-ports 8081; iptables -t nat -A PREROUTING -i eth+ -p tcp --dport 8899 -j DNAT --to-destination 10.0.0.3; iptables -t nat -A PREROUTING -i eth+ -p tcp --dport 8086 -j DNAT --to-destination 10.0.0.3; iptables -t nat -A PREROUTING -i eth+ -p tcp -j DNAT --to-destination 10.0.0.2; iptables -t nat -A PREROUTING -i eth+ -p udp -j DNAT --to-destination 10.0.0.2; iptables -t nat -A POSTROUTING -d 10.0.0.2 -j MASQUERADE; iptables -t nat -A POSTROUTING -d 10.0.0.3 -j MASQUERADE
-
 PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT; iptables -t nat -D POSTROUTING -o eth+ -j MASQUERADE; iptables -t nat -D PREROUTING -i eth+ -p udp --dport 51820 -j RETURN; iptables -t nat -D PREROUTING -i eth+ -p tcp --dport 4000 -j REDIRECT --to-ports 4000; iptables -t nat -D PREROUTING -i eth+ -p tcp --dport 4822 -j REDIRECT --to-ports 4822; iptables -t nat -D PREROUTING -i eth+ -p tcp --dport 8081 -j REDIRECT --to-ports 8081; iptables -t nat -D PREROUTING -i eth+ -p tcp --dport 8899 -j DNAT --to-destination 10.0.0.3; iptables -t nat -D PREROUTING -i eth+ -p tcp --dport 8086 -j DNAT --to-destination 10.0.0.3; iptables -t nat -D PREROUTING -i eth+ -p tcp -j DNAT --to-destination 10.0.0.2; iptables -t nat -D PREROUTING -i eth+ -p udp -j DNAT --to-destination 10.0.0.2; iptables -t nat -D POSTROUTING -d 10.0.0.2 -j MASQUERADE; iptables -t nat -D POSTROUTING -d 10.0.0.3 -j MASQUERADE
-
 MTU = 1280
 ```
 
