@@ -53,11 +53,11 @@ export default function MetricItem({
 			<div className="flex items-center justify-between">
 				<span className="text-xs text-accent/60 font-medium uppercase tracking-wide">{label}</span>
 				<div className="flex items-center gap-2">
-					<span className={`text-sm font-mono font-bold ${colorScheme.text}`}>
+					<span className={`text-sm font-sans font-semibold ${colorScheme.text}`}>
 						{displayValue}
 					</span>
 					{temp && (
-						<span className="text-[10px] text-accent/30 font-mono">
+						<span className="text-[10px] text-accent/30 font-sans">
 							&nbsp; {temp}
 						</span>
 					)}
@@ -66,10 +66,10 @@ export default function MetricItem({
 			{/* Animated progress bar */}
 			<div className={`h-2 rounded-full overflow-hidden ${colorScheme.bg} border ${colorScheme.border}`}>
 				<div
-					className={`h-full ${colorScheme.bar} transition-all duration-500 rounded-full`}
+					className={`h-full ${colorScheme.bar} transition-[width] duration-500 rounded-full motion-reduce:transition-none`}
 					style={{
 						width: `${percent}%`,
-						boxShadow: `0 0 2px ${colorScheme.bar === 'bg-emerald-400' ? 'rgba(52, 211, 153, 0.1)' : colorScheme.bar === 'bg-amber-400' ? 'rgba(251, 191, 36, 0.1)' : 'rgba(248, 113, 113, 0.1)'}`,
+						willChange: 'width',
 					}}
 				/>
 			</div>

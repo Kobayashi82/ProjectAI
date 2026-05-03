@@ -1,10 +1,10 @@
 <div align="center">
 
-![Infrastructure](https://img.shields.io/badge/Infrastructure-VPS%20Docker-2f855a?style=for-the-badge)
-![Network](https://img.shields.io/badge/Network-WireGuard-1f6feb?style=for-the-badge)
-![Dashboard](https://img.shields.io/badge/Dashboard-Monitoring-8a5cf6?style=for-the-badge)
+![Infraestructura](https://img.shields.io/badge/Infraestructura-VPS%20Docker-2f855a?style=for-the-badge)
+![Red](https://img.shields.io/badge/Red-WireGuard-1f6feb?style=for-the-badge)
+![Dashboard](https://img.shields.io/badge/Dashboard-Monitorizacion-8a5cf6?style=for-the-badge)
 
-*Unified dashboard for AI services, remote operations, and monitoring across home and VPS environments*
+*Dashboard unificado para operaciones remotas, multimedia, gaming, servicios de IA y monitorizacion*
 
 </div>
 
@@ -14,303 +14,242 @@
 
 # Project AI
 
-[README en Español](README_es.md)
+`Project AI` es una plataforma centralizada de servicios alojada en un `VPS` con `Docker`. Proporciona acceso unificado a servicios de IA, streaming multimedia, operaciones remotas y monitorizacion en tiempo real.
 
-`Project AI` is a centralized web `dashboard` and service platform hosted on a `VPS` with `Docker`. It provides unified access to AI services, media streaming, remote operations, and real-time monitoring across distributed nodes.
+> [!WARNING]
+> Esto es un proyecto personal yuede contener errores o funciones incompletas. Úsalo bajo tu propia responsabilidad.
 
-## Table of Contents
+## Tabla de Contenidos
 
-1. [Overview](#overview)
-2. [Infrastructure](#infrastructure)
-3. [Services](#services)
-4. [Installation](#installation)
-5. [VPS](#vps)
-6. [License](#license)
+1. [Vision General](#vision-general)
+2. [Instalación](#instalación)
+3. [Nodos y Servicios](#nodos-y-servicios)
+4. [Licencia](#licencia)
 
-## Overview
+## Vision General
 
-### Key Features
+### Caracteristicas Principales
 
-- **Remote Control**: Power management, service control, and system commands
-- **Privacy Focused**: Local infrastructure integratated with `WireGuard`
-- **Secure Remote Operations**: `SSH`, `VNC`, `RDP` access through `Guacamole`
-- **Centralized AI**: `ACE Step`, `ComfyUI` and `Open WebUI` from one unified dashboard
-- **Media Hub**: `Jellyfin` for local media streaming
-- **Real-time Monitoring**: Live metrics from all nodes (CPU, RAM, GPU, Disks)
+- **Control Remoto**: Gestion de energia, control de servicios y comandos del sistema
+- **Enfocado en Privacidad**: Infraestructura local integrada con `WireGuard`
+- **Operaciones Remotas Seguras**: Acceso `SSH`, `VNC`, `RDP` a traves de `Guacamole`
+- **IA Centralizada**: `ACE Step`, `ComfyUI` y `Open WebUI` desde un unico dashboard
+- **Centro Multimedia**: `Jellyfin` y `Navidrome` para streaming
+- **Juego remoto**: `Sunshine` y `Moonlight` y `RomM` para consolas retro
+- **Monitorizacion en Tiempo Real**: Metricas en vivo (CPU, RAM, GPU, discos) y `Uptime Kuma` para alertas
 
-### Security
+### Seguridad
 
-- **Single User Auth**: `Authelia` provides centralized login for all protected services
-- **API Route Protection**: Enforced via `Remote-User` headers from `Caddy` + `Authelia`
-- **SSH Keys**: Required for remote operations and `Guacamole` connections
+- **Autenticacion de Usuario Unico**: `Authelia` proporciona login centralizado para servicios protegidos
+- **Proteccion de Rutas API**: Aplicada mediante encabezados `Remote-User` de `Caddy` + `Authelia`
+- **Claves SSH**: Requeridas para operaciones remotas y conexiones `Guacamole`
 
-## Infrastructure
+### Infraestructura
 
-The system is built on:
+El sistema se construye sobre:
 
-- **Dashboard** for central control and remote operations
-- **Caddy** as the public-facing web server and reverse proxy
-- **Authelia** for authentication and session management  
-- **WireGuard** to securely bridge `PC` and `RPI` behind `CG-NAT`
-- **Guacamole** for remote session management (`SSH`, `VNC`, `RDP`)
-- **Docker Compose** for service orchestration
+- **Dashboard** para control central y operaciones remotas
+- **Caddy** como servidor web y reverse proxy de entrada publica
+- **Authelia** para autenticacion y gestion de sesiones
+- **WireGuard** para conectar de forma segura `PC` y `RPI` tras `CG-NAT`
+- **Guacamole** para gestion de sesiones remotas (`SSH`, `VNC`, `RDP`)
+- **Docker Compose** para orquestacion de servicios
 
 ```
-Internet
-    ↓
-Caddy (VPS)
-    ↓
-    ├─→ Authelia
-    ├─→ Portainer
-    ├─→ Guacamole
-    ├─→ FileBrowser
-    ├─→ Open WebUI
-	├─→ SearXNG
-    ↓
-    WireGuard
-        ├─→ PC (Windows)
-        │   ├─ FileBrowser
-        │   ├─ Jellyfin
-        │   ├─ Torrent
-        │   ├─ ACE Step
-        │   ├─ ComfyUI
-        │   └─ Ollama
-        └─→ Raspberry Pi
-            ├─ FileBrowser
-            └─ Torrent
+VPS → Caddy ─────────→ WireGuard
+      ↓                ↓
+      ├→ Authelia      ├→ PC
+      ├→ Portainer     │  ├→ File Browser
+      ├→ Uptime Kuma   │  ├→ VSCode
+      ├→ Guacamole     │  ├→ Navidrome
+      ├→ File Browser  │  ├→ Jellyfin
+      ├→ Navidrome     │  ├→ Torrent
+      ├→ RomM          │  ├→ Sunshine
+      ├→ Open WebUI    │  ├→ Moonlight
+      └→ SearXNG       │  ├→ ACE Step
+                       │  ├→ ComfyUI
+                       │  ├→ Ollama
+                       │  └→ Speaches
+                       └→ RPI
+                          ├→ File Browser
+                          └→ Torrent
 ```
 
 ---
 
-### Caddy
+## Instalación
 
-Modern web server and reverse proxy.
-
-- **Automatic HTTPS**: TLS/SSL certificates managed automatically
-- **Reverse Proxy**: Routes subdomains to Docker containers
-- **Authentication**: Integrates with Authelia for access control
-
-### Authelia
-
-Centralized authentication.
-
-- **Single Login**: One password for all protected services
-- **Method**: Forward auth via Caddy headers
-- **Session Control**: Automatic timeout and refresh tokens
-
-### Portainer
-
-Docker management for container.
-
-- **Features**: Container management, image management, volume control, log viewing
-- **Capabilities**: Restart services, inspect logs, monitor deployments
-
-### WireGuard
-
-Encrypted and high-performance `VPN` connecting `VPS`, `PC`, and `RPI`.
-
-- **Feature**: Securely bridge nodes behind `CG-NAT`
-- **Low Latency**: Private network for service-to-service communication
-
-### Guacamole
-
-Remote access gateway.
-
-- **Supported Protocols**: `SSH`, `VNC`, `RDP`
-
-## Services
-
-### FileBrowser
-
-Web file manager.
-
-- **Access**: Via `WireGuard` from `VPS`
-- **Feature**: Browse, upload, and manage files remotely
-
-### Jellyfin
-
-Self-hosted media server.
-
-- **Access**: Via `WireGuard` from `VPS`
-- **Feature**: Streaming of movies, shows, and music libraries
-
-### Torrent
-
-P2P file transfer service.
-
-- **Access**: Via `WireGuard` from `VPS`
-- **Feature**: Seed and download files
-
-### ACE Step
-
-AI music generation platform.
-
-- **Access**: Via `WireGuard` from `VPS`
-- **Feature**: Generate music from prompts and presets
-
-### ComfyUI
-
-Image and video generation.
-
-- **Access**: Via `WireGuard` from `VPS`
-- **Feature**: Visual workflows and nodes
-
-### Open WebUI
-
-Web chat frontend with multi-model support.
-
-- **Feature**: `LLM` models chat
-- **Primary Backend**: `Ollama` (via `WireGuard` from `PC`)
-- **Search Integration**: `SearXNG` for web-assisted responses
-- **Image Generation**: `ComfyUI` (via `WireGuard` from `PC`)
-
-### K-Desktop
-
-Windows automation suite.
-
-- **Access**: Via `WireGuard` from `VPS`
-- **Features**: Remote commands (`UDP`), global shortcuts, screenshots, recordings
-- **GitHub**: https://github.com/Kobayashi82/K-Desktop
-
-### Telemetry
-
-Metric services running on each node.
-
-- **System**: CPU, RAM, temperature
-- **GPU**: Load, VRAM, temperature
-- **Disks**: Used and total per mounted drive
-
----
-
-## Installation
-
-1. **Copy and configure `.env`**
+1. **Establecer valores**
 ```bash
-cp .env.example .env
-# Edit .env with your domains, users, IPs, and ports
+# Modificar variables en authelia.sh
+# Modificar variables en guacamole.sh
+# Modificar domain en docker-compose.yml
+# Modificar domain en caddy/Caddyfile
+# Modificar domain en dashboard/front/vite.config.ts
 ```
 
-2. **Setup private keys**
+2. **Configurar claves privadas**
 ```bash
-# Place private SSH keys in scripts/keys/
-# Rename/move them to match .env values:
-#   - API_SSH_KEY (for API remote commands)
-#   - CON[n]_KEY (for Guacamole SSH connections)
+# Colocar claves SSH privadas en scripts/keys/
+# Deben coincidir con valores de `Guacamole.sh`:
+#   - API_SSH_KEY (para comandos remotos del API)
+#   - CON[n]_KEY (para conexiones SSH de Guacamole)
 ```
 
-3. **Initialize configuration**
+3. **Inicializar configuracion**
 ```bash
 make init
-# Generates:
+
+# Genera:
 #   - authelia/configuration.yml
 #   - authelia/users.yml
-#   - caddy/Caddyfile
 #   - guacamole/001-initdb.sql
 #   - guacamole/002-seed-connections.sql
-#   - jellyfin/ (container config)
 #   - searxng/settings.yml
 #   - dashboard/api/privatekey
 ```
 
-4. **Start services**
+4. **Iniciar servicios**
 ```bash
-make up           # Start all services
-make down         # Stop all services
-make restart      # Restart all services
-make build        # Rebuild images
-make rebuild      # Force rebuild all images
-make fclean       # Full cleanup (removes containers, volumes, images)
+make up
+```
+
+5. **Configurar `iptables`
+Añadir al archivo `wireguard/wg_confs/wg0.conf` en la sección `[Interface]`
+
+```bash
+PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; iptables -t nat -A POSTROUTING -o eth+ -j MASQUERADE; iptables -t nat -A PREROUTING -i eth+ -p udp --dport 51820 -j RETURN; iptables -t nat -A PREROUTING -i eth+ -p tcp --dport 4000 -j REDIRECT --to-ports 4000; iptables -t nat -A PREROUTING -i eth+ -p tcp --dport 4822 -j REDIRECT --to-ports 4822; iptables -t nat -A PREROUTING -i eth+ -p tcp --dport 8081 -j REDIRECT --to-ports 8081; iptables -t nat -A PREROUTING -i eth+ -p tcp --dport 8899 -j DNAT --to-destination 10.0.0.3; iptables -t nat -A PREROUTING -i eth+ -p tcp --dport 8086 -j DNAT --to-destination 10.0.0.3; iptables -t nat -A PREROUTING -i eth+ -p tcp -j DNAT --to-destination 10.0.0.2; iptables -t nat -A PREROUTING -i eth+ -p udp -j DNAT --to-destination 10.0.0.2; iptables -t nat -A POSTROUTING -d 10.0.0.2 -j MASQUERADE; iptables -t nat -A POSTROUTING -d 10.0.0.3 -j MASQUERADE
+
+PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT; iptables -t nat -D POSTROUTING -o eth+ -j MASQUERADE; iptables -t nat -D PREROUTING -i eth+ -p udp --dport 51820 -j RETURN; iptables -t nat -D PREROUTING -i eth+ -p tcp --dport 4000 -j REDIRECT --to-ports 4000; iptables -t nat -D PREROUTING -i eth+ -p tcp --dport 4822 -j REDIRECT --to-ports 4822; iptables -t nat -D PREROUTING -i eth+ -p tcp --dport 8081 -j REDIRECT --to-ports 8081; iptables -t nat -D PREROUTING -i eth+ -p tcp --dport 8899 -j DNAT --to-destination 10.0.0.3; iptables -t nat -D PREROUTING -i eth+ -p tcp --dport 8086 -j DNAT --to-destination 10.0.0.3; iptables -t nat -D PREROUTING -i eth+ -p tcp -j DNAT --to-destination 10.0.0.2; iptables -t nat -D PREROUTING -i eth+ -p udp -j DNAT --to-destination 10.0.0.2; iptables -t nat -D POSTROUTING -d 10.0.0.2 -j MASQUERADE; iptables -t nat -D POSTROUTING -d 10.0.0.3 -j MASQUERADE
+
+MTU = 1280
+```
+
+4. **Reiniciar servicios**
+```bash
+make restart
 ```
 
 ---
 
-## VPS
+## Nodos y Servicios
 
-Recommended baseline to prepare the `VPS` before deploying `Project AI` services.
+| NODO  | DESCRIPCIÓN                                                                       |
+|-------|-----------------------------------------------------------------------------------|
+| `VPS` | *Hetzner CPX32 — 4 vCPU AMD compartidas, 8GB RAM, Ubuntu*                         |
+| `RPI` | *Raspberry Pi 3B+ — ARM Cortex-A53 1.4GHz, 1GB RAM, Raspberry Pi OS*              |
+| `PC`  | *Ryzen 7 7800X3D 8-cores RTX 4070 Super 12GB VRAM, 64GB DDR5 6000MHz, Windows 11* |
+|
 
-### Creation & Access
+| SERVICIO            | NODO | URL                         | PUERTO | DESCRIPCIÓN                                    |
+|---------------------|----- |-----------------------------|--------|------------------------------------------------|
+| `Caddy`             | VPS  | mydomain.net                | 80/443 | Servidor web y proxy inverso                   |
+| `Authelia`          | VPS  | auth.mydomain.net           | 9091   | Autenticación centralizada                     |
+| `WireGuard`         | VPS  | mydomain.net (UDP)          | 51820  | Túnel `VPN` cifrado                            |
+| `Portainer`         | VPS  | portainer.mydomain.net      | 9000   | Gestión de contenedores `Docker`               |
+| `Uptime Kuma`       | VPS  | kuma.mydomain.net           | 3001   | Monitorización con alertas por `Telegram`      |
+| `Guacamole`         | VPS  | guacamole.mydomain.net      | 8080   | Gateway de acceso remoto (`RDP`, `SSH`, `VNC`) |
+| `File Browser`      | VPS  | files.vps.mydomain.net      | 8085   | Gestor de archivos                             |
+| `Navidrome`         | VPS  | navidrome.mydomain.net      | 4533   | Servidor de música                             |
+| `RomM`              | VPS  | romm.mydomain.net           | 8080   | Emulador de consolas retro                     |
+| `SearXNG`           | VPS  | searxng.mydomain.net        | 8888   | Meta-Buscador privado                          |
+| `API`               | VPS  | mydomain.net/api (internal) | 4000   | Backend de la aplicación                       |
+| `Front`             | VPS  | mydomain.net                | 80     | Frontend de la aplicación                      |
+| `SSH`               | VPS  | mydomain.net                | 22     | Acceso remoto a la terminal                    |
+| `SSH (PC)`          | VPS  | mydomain.net                | 2022   | Túnel SSH hacia `PC`                           |
+| `Telemetría`        | PC   | WireGuard (internal)        | 8000   | Métricas en tiempo real (CPU, RAM, GPU, disco) |
+|
 
-1. **Create VPS** with your preferred provider and obtain IP
-2. **Use SSH keys** instead of password authentication
-3. **Change root password** if needed: `passwd root`
+| SERVICIO            | NODO | URL                         | PUERTO | DESCRIPCIÓN                                    |
+|---------------------|----- |-----------------------------|--------|------------------------------------------------|
+| `Shutdown`          | RPi  | API (internal)              | 22     | Apagado remoto                                 |
+| `Reboot`            | RPi  | API (internal)              | 22     | Reinicio remoto                                |
+| `SSH`               | RPi  | guacamole (internal)        | 22     | Acceso remoto a la terminal                    |
+| `File Browser`      | RPi  | files.rpi.mydomain.net      | 8085   | Gestor de archivos                             |
+| `Torrent`           | RPi  | torrent.rpi.mydomain.net    | 8899   | Cliente torrent                                |
+| `Telemetría`        | PC   | WireGuard (internal)        | 8000   | Métricas en tiempo real (CPU, RAM, GPU, disco) |
+|
 
-### SSH Configuration
+| SERVICIO            | NODO | URL                         | PUERTO | DESCRIPCIÓN                                    |
+|---------------------|----- |-----------------------------|--------|------------------------------------------------|
+| `Wake`              | RPi  | API (internal)              | 22     | Encendido remoto                               |
+| `Shutdown`          | PC   | API (internal)              | 22     | Apagado remoto                                 |
+| `Reboot`            | PC   | API (internal)              | 22     | Reinicio remoto                                |
+| `SSH`               | PC   | guacamole (internal)        | 22     | Acceso remoto a la terminal                    |
+| `VNC`               | PC   | guacamole (internal)        | 5900   | Acceso remoto al escritorio                    |
+| `RDP`               | PC   | guacamole (internal)        | 3389   | Acceso remoto al escritorio con `RDP`          |
+| `File Browser`      | PC   | files.pc.mydomain.net       | 8085   | Gestor de archivos                             |
+| `VSCode`            | PC   | vscode.mydomain.net         | 7777   | Editor de código                               |
+| `Navidrome`         | PC   | navidrome.pc.mydomain.net   | 7775   | Servidor de música                             |
+| `Jellyfin`          | PC   | jellyfin.mydomain.net       | 8096   | Servidor multimedia                            |
+| `Torrent`           | PC   | torrent.mydomain.net        | 8899   | Cliente torrent                                |
+| • `Sunshine`        | PC   | sunshine.mydomain.net       | 47990  | Servidor de streaming                          |
+| • `Moonlight`       | PC   | moonlight.mydomain.net      | 7891   | Cliente de streaming                           |
+| `ACE Step`          | PC   | acestep.mydomain.net        | 7860   | Generación de música                           |
+| `ComfyUI`           | PC   | comfyui.mydomain.net        | 8188   | Generación de imágen y vídeo                   |
+| • `Open WebUI`      | VPS  | openwebui.mydomain.net      | 8081   | Interfaz para modelos `LLM`                    |
+| `Ollama`            | PC   | WireGuard (internal)        | 11434  | Servidor de modelos `LLM`                      |
+| `Speaches`          | PC   | WireGuard (internal)        | 8010   | Síntesis y transcripción de voz `TTS`/`STT`    |
+| `K-Desktop`         | PC   | WireGuard (internal)        | 2501   | Ejecución de comandos remotos                  |
+| `Telemetría`        | PC   | WireGuard (internal)        | 8000   | Métricas en tiempo real (CPU, RAM, GPU, disco) |
+|
 
-**Generate SSH key:**
+### • Sunshine
+
+| SERVICIO            | PROTOCOL | PUERTO      |
+|---------------------|----------|-------------|
+| `Portal`            | HTTPS    | 47990       |
+| `Emparejamiento`    | HTTPS    | 47984       |
+| `Emparejamiento`    | HTTP     | 47989       |
+| `Control de Stream` | TCP      | 48010       |
+| `Vídeo y Audio`     | UDP      | 47998-48000 |
+| `Audio`             | UDP      | 48002       |
+| `Micrófono`         | UDP      | 48004       |
+|
+
+### • Moonlight
+
+| SERVICIO            | PROTOCOL | PUERTO      |
+|---------------------|----------|-------------|
+| `Portal`            | HTTP     | 7891        |
+| `Comunicación`      | UDP      | 40000-40100 |
+|
+
 ```bash
-ssh-keygen -t ed25519 -C "identifier"
-chmod 700 ~/.ssh
-chmod 600 ~/.ssh/authorized_keys
+# Iniciar moonlight-web en PC
+docker run -d --name moonlight-web --restart always -p 7891:8080 -p 40000-40100:40000-40100/udp -e WEBRTC_NAT_1TO1_HOST=DOMAIN_IP -v moonlight-data:/server mrcreativ3001/moonlight-web-stream:latest
 ```
 
-**SSH config file** (`~/.ssh/config`):
-```ini
-Host [ServerName]
-  HostName [ServerIP]
-  User root
-  IdentityFile ~/.ssh/identifier
-```
+### • Open WebUI
 
-**Harden SSH** (`/etc/ssh/sshd_config`):
-```ini
-PermitRootLogin prohibit-password
-PubkeyAuthentication yes
-PasswordAuthentication no
-```
+| SERVICIO            | PUERTO                                           |
+|--------------------|--------------------------------------------------|
+| `Search`            | http://searxng:8888/search?q=<query>&format=json |
+| `STT`               | http://10.0.0.2:8010/v1                          |
+| `STT Model`         | Systran/faster-whisper-large-v3                  |
+| `TTS`               | http://10.0.0.2:8010/v1                          |
+| `TTS Model`         | speaches-ai/piper-es_ES-davefx-medium            |
+| `TTS Voice`         | davefx                                           |
+| `ComfyUI`           | http://10.0.0.2:8188                             |
+| `ComfyUI Model`     | Flux 2 Klein 9B fp8.safetensors                  |
+| `ComfyUI Image`     | 512x512                                          |
+| `ComfyUI Steps`     | 4                                                |
+| `ComfyUI prompt`    | 439                                              |
+| `ComfyUI ckpt_name` | 433                                              |
+| `ComfyUI width`     | 438                                              |
+| `ComfyUI height`    | 438                                              |
+| `ComfyUI steps`     | 430                                              |
+| `ComfyUI seed`      | 430                                              |
+|
 
-Apply changes:
-```bash
-systemctl restart ssh
-```
+## Licencia
 
-### User & Security
-
-**Create sudo user:**
-```bash
-adduser [username]
-usermod -aG sudo [username]
-```
-
-**Hide login banner (optional):**
-```bash
-touch ~/.hushlogin
-```
-
-**Setup Fail2ban:**
-```bash
-sudo apt update
-sudo apt install fail2ban -y
-sudo systemctl enable fail2ban
-sudo systemctl start fail2ban
-sudo fail2ban-client status sshd
-```
-
-### Docker
-
-```bash
-curl -fsSL https://get.docker.com | sudo sh
-sudo usermod -aG docker [username]
-newgrp docker
-docker run --rm hello-world && docker rmi hello-world
-```
-
-### Build Tools
-
-```bash
-sudo apt update
-sudo apt install build-essential -y
-```
-
----
-
-## License
-
-This project is licensed under the WTFPL - [Do What the Fuck You Want to Public License](http://www.wtfpl.net/about/).
+Este proyecto esta licenciado bajo la WTFPL - [Do What the Fuck You Want to Public License](http://www.wtfpl.net/about/).
 
 ---
 
 <div align="center">
 
-**🤖 Developed by Kobayashi82 🤖**
+**🤖 Desarrollado por Kobayashi82 🤖**
 
 *"Keep it local. Keep it free"*

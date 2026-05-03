@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ ! -f searxng/settings.yml ]; then
-	# Generate settings.yml
+    mkdir -p searxng
     cat > searxng/settings.yml <<EOF
 general:
   # Debug mode, only for development. Is overwritten by ${SEARXNG_DEBUG}

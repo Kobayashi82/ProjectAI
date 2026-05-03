@@ -23,10 +23,12 @@ export default {
 				warning: '#ffb800',
 			},
 			fontFamily: {
+				sans: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
 				mono: ['"JetBrains Mono"', '"Fira Code"', 'monospace'],
 			},
 			boxShadow: {
 				glow: '0 0 20px rgba(0, 255, 157, 0.3), 0 0 40px rgba(0, 255, 157, 0.1)',
+				'glow-soft': '0 0 12px rgba(0, 255, 157, 0.18), 0 0 24px rgba(0, 255, 157, 0.06)',
 				'glow-lg': '0 0 30px rgba(0, 255, 157, 0.4), 0 0 60px rgba(0, 255, 157, 0.2)',
 				'glow-red': '0 0 20px rgba(255, 59, 92, 0.3)',
 				'glow-yellow': '0 0 20px rgba(255, 184, 0, 0.3)',

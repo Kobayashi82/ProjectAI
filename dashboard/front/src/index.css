@@ -7,33 +7,21 @@
 		box-sizing: border-box;
 	}
 
+	body.no-motion *,
+	body.no-motion *::before,
+	body.no-motion *::after {
+		animation: none !important;
+		transition: none !important;
+	}
+
 	body {
-		@apply bg-surface-base text-accent font-mono;
+		@apply bg-surface-base text-accent font-sans;
 		background: linear-gradient(135deg, #0a0e0f 0%, #0f1419 50%, #0a0e0f 100%);
 		background-attachment: fixed;
 		background-image:
 			radial-gradient(circle at 20% 50%, rgba(0, 255, 157, 0.05) 0%, transparent 50%),
-			radial-gradient(circle at 80% 80%, rgba(76, 154, 255, 0.03) 0%, transparent 50%),
-			/* Subtle grid pattern for professional feel */
-			linear-gradient(rgba(0, 255, 157, 0.02) 1px, transparent 1px),
-			linear-gradient(90deg, rgba(0, 255, 157, 0.02) 1px, transparent 1px);
-		background-size: 100%, 100%, 32px 32px, 32px 32px;
-	}
-
-	/* -- Scanline overlay effect - more subtle */
-	body::after {
-		content: '';
-		position: fixed;
-		inset: 0;
-		background: repeating-linear-gradient(
-			0deg,
-			transparent,
-			transparent 2px,
-			rgba(0, 0, 0, 0.03) 2px,
-			rgba(0, 0, 0, 0.03) 4px
-		);
-		pointer-events: none;
-		z-index: 9999;
+			radial-gradient(circle at 80% 80%, rgba(76, 154, 255, 0.03) 0%, transparent 50%);
+		background-size: 100%, 100%;
 	}
 
 	/* -- Custom scrollbar */
@@ -76,6 +64,24 @@
 		border-radius: 12px;
 	}
 
+	.machine-card-online:hover {
+		@apply border-accent/20;
+		box-shadow:
+			0 0 0 1px rgba(0, 255, 157, 0.15),
+			inset 0 0 20px rgba(0, 255, 157, 0.05),
+			0 20px 60px rgba(0, 255, 157, 0.1);
+		transform: translateY(-2px);
+	}
+
+	.machine-card-offline:hover {
+		@apply border-red-500/30;
+		box-shadow:
+			0 0 0 1px rgba(127, 29, 29, 0.18),
+			inset 0 0 20px rgba(127, 29, 29, 0.08),
+			0 20px 60px rgba(127, 29, 29, 0.12);
+		transform: translateY(-2px);
+	}
+
 	.glow {
 		text-shadow: 0 0 15px rgba(0, 255, 157, 0.6), 0 0 30px rgba(0, 255, 157, 0.3);
 		font-weight: 700;
@@ -86,7 +92,7 @@
 	}
 
 	.btn-action {
-		@apply px-4 py-2 text-[11px] font-mono tracking-wider uppercase
+		@apply px-4 py-2 text-[11px] font-sans tracking-wider uppercase
 			border border-accent/40 bg-gradient-to-r from-accent/5 to-accent/0
 			text-accent/80 transition-all duration-200
 			cursor-pointer rounded-md font-semibold shadow-lg;
@@ -99,7 +105,7 @@
 	}
 
 	.btn-service {
-		@apply px-3 py-2 text-[10px] font-mono tracking-widest uppercase
+		@apply px-3 py-2 text-[10px] font-sans tracking-widest uppercase
 			border border-accent/30 bg-accent/5
 			text-accent/70 transition-all duration-150
 			cursor-pointer flex items-center gap-2 rounded-md;
@@ -117,6 +123,18 @@
 
 	.btn-service-ai {
 		@apply border-violet-400/40 text-violet-300/80 bg-violet-400/5;
+	}
+
+	.btn-service-development {
+		@apply border-amber-400/40 text-amber-300/80 bg-amber-400/5;
+	}
+
+	.btn-service-gaming {
+		@apply border-rose-400/40 text-rose-300/80 bg-rose-400/5;
+	}
+
+	.btn-service-monitor {
+		@apply border-orange-400/40 text-orange-300/80 bg-orange-400/5;
 	}
 
 	.btn-refresh {
@@ -144,7 +162,7 @@
 	}
 
 	.cmd-name {
-		@apply text-[10px] font-mono text-accent/50 uppercase tracking-widest truncate;
+		@apply text-[10px] font-sans text-accent/50 uppercase tracking-widest truncate;
 	}
 
 	.cmd-run {
@@ -174,7 +192,7 @@
 		}
 
 		.cmd-item:hover {
-			@apply shadow-glow;
+			@apply shadow-glow-soft;
 		}
 
 		.btn-action:active,
@@ -186,7 +204,7 @@
 
 	/* -- Section heading enhancement */
 	h3 {
-		@apply font-mono;
+		@apply font-sans;
 	}
 
 	/* -- Custom scrollbar styling */
@@ -234,6 +252,12 @@
 
 	.status-offline {
 		@apply bg-red-500/10 border-red-500/30;
+	}
+}
+
+@layer utilities {
+	.shadow-glow-soft {
+		box-shadow: 0 0 12px rgba(0, 255, 157, 0.18), 0 0 24px rgba(0, 255, 157, 0.06);
 	}
 }
 

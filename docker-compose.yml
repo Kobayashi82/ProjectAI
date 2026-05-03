@@ -1,6 +1,10 @@
 services:
 
-# -------- CADDY --------
+# ┌──────────────────────────────────────────────────┐
+# │                        VPS                       │
+# └──────────────────────────────────────────────────┘
+
+# ────────── CADDY ──────────
 
   caddy:
     image: caddy:2.11.2
@@ -16,7 +20,7 @@ services:
     networks:
       - internal
 
-# -------- AUTHELIA --------
+# ────────── AUTHELIA ──────────
 
   authelia:
     image: authelia/authelia:4.39
@@ -27,19 +31,7 @@ services:
     networks:
       - internal
 
-# -------- PORTAINER --------
-
-  portainer:
-    image: portainer/portainer-ce:2.39.0
-    container_name: portainer
-    restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - portainer_data:/data
-    networks:
-      - internal
-
-# -------- WIREGUARD --------
+# ────────── WIREGUARD ──────────
 
   wireguard:
     image: linuxserver/wireguard:latest
@@ -53,22 +45,55 @@ services:
       - PGID=1000
       - TZ=Europe/Madrid
       - SERVERURL=auto
-      - SERVERPORT=${WIREGUARD_PORT:-51820}
-      - PEERS=${WIREGUARD_PEERS}
+      - SERVERPORT=51820
+      - PEERS=padre,raspberry
       - PEERDNS=auto
-      - INTERNAL_SUBNET=${WIREGUARD_SUBNET:-10.0.0.0/24}
-      - ALLOWEDIPS=${WIREGUARD_ALLOWEDIPS:-0.0.0.0/0}
+      - INTERNAL_SUBNET=10.0.0.0/24
+      - ALLOWEDIPS=10.0.0.0/24
     volumes:
       - ./wireguard:/config
       - /lib/modules:/lib/modules:ro
     ports:
-      - "${WIREGUARD_PORT:-51820}:${WIREGUARD_PORT:-51820}/udp"
+      - "51820:51820/udp"
+      - "2022:22"
+      - 40000-40100:40000-40100/udp
+      - "47984:47984/tcp"
+      - "47989:47989/tcp"
+      - "48010:48010/tcp"
+      - "47998-48000:47998-48000/udp"
+      - "48002:48002/udp"
+      - "48004:48004/udp"
     sysctls:
       - net.ipv4.conf.all.src_valid_mark=1
     networks:
       - internal
 
-# -------- GUACAMOLE --------
+# ────────── PORTAINER ──────────
+
+  portainer:
+    image: portainer/portainer-ce:2.39.0
+    container_name: portainer
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - internal
+
+# ────────── UPTIME KUMA ──────────
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:latest
+    container_name: uptime-kuma
+    volumes:
+      - uptime-kuma_data:/app/data
+    environment:
+      - UPTIME_KUMA_DISABLE_AUTH=1
+    restart: unless-stopped
+    networks:
+      - internal
+
+# ────────── GUACAMOLE ──────────
 
   postgres:
     image: postgres:16.9-alpine
@@ -118,29 +143,80 @@ services:
       - postgres
       - guacd
 
-# -------- ACE STEP --------
+# ────────── FILE BROWSER ──────────
 
-  acestep:
-    image: alpine/socat:1.8.0.3
-    container_name: acestep
+  filebrowser-vps:
+    image: filebrowser/filebrowser:v2.44.0
+    container_name: filebrowser-vps
     restart: unless-stopped
-    network_mode: "service:wireguard"
-    depends_on:
-      - wireguard
-    command: TCP-LISTEN:${ACESTEP_PORT},fork,reuseaddr TCP:${ACESTEP_WIREGUARD_IP}:${ACESTEP_WIREGUARD_PORT}
+    environment:
+      - FB_NOAUTH=true
+      - FB_ROOT=/srv
+      - FB_DATABASE=/tmp/database.db
+      - FB_PORT=8085
+    volumes:
+      - ~/:/srv
+      - filebrowser_config:/config
+      - filebrowser_database:/database
+    networks:
+      - internal
 
-# -------- COMFY UI --------
+# ────────── NAVIDROME ──────────
 
-  comfyui:
-    image: alpine/socat:1.8.0.3
-    container_name: comfyui
+  navidrome:
+    image: deluan/navidrome:latest
+    container_name: navidrome
     restart: unless-stopped
-    network_mode: "service:wireguard"
-    depends_on:
-      - wireguard
-    command: TCP-LISTEN:${COMFYUI_PORT},fork,reuseaddr TCP:${COMFYUI_WIREGUARD_IP}:${COMFYUI_WIREGUARD_PORT}
+    environment:
+      ND_SCANSCHEDULE: 1h
+      ND_LOGLEVEL: info
+    volumes:
+      - navidrome_data:/data
+      - "./navidrome:/music:ro"
+    networks:
+      - internal
 
-# -------- OPEN WEBUI --------
+# ────────── ROMM ──────────
+
+  romm:
+    image: rommapp/romm:latest
+    container_name: romm
+    restart: unless-stopped
+    depends_on:
+      - romm-db
+    environment:
+      - DB_HOST=romm-db
+      - DB_NAME=romm
+      - DB_USER=romm_user
+      - DB_PASSWD=romm_pass
+      - ROMM_AUTH_SECRET_KEY=
+      - IGDB_CLIENT_ID=
+      - IGDB_CLIENT_SECRET=
+    volumes:
+      - romm_config:/romm/config
+      - romm_assets:/romm/assets
+      - romm_redis_data:/redis-data
+      - romm_library_data:/romm/library
+      - romm_resources_data:/romm/resources
+      - ./romm:/romm/library/roms
+    networks:
+      - internal
+
+  romm-db:
+    image: mariadb:latest
+    container_name: romm-db
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_pass
+      - MYSQL_DATABASE=romm
+      - MYSQL_USER=romm_user
+      - MYSQL_PASSWORD=romm_pass
+    volumes:
+      - romm_database:/var/lib/mysql
+    networks:
+      - internal
+
+# ────────── OPEN WEBUI ──────────
 
   openwebui:
     image: ghcr.io/open-webui/open-webui:v0.9.2
@@ -151,17 +227,19 @@ services:
       - wireguard
     environment:
       - HOST=0.0.0.0
-      - PORT=${OPENWEBUI_PORT:-8081}
-      - WEBUI_URL=https://${OPENWEBUI_DOMAIN}
+      - PORT=8081
+      - WEBUI_URL=https://openwebui.mydomain.net
       - ENABLE_LOGIN_FORM=False
       - ENABLE_SIGNUP=False
       - ENABLE_OPENAI_API=False
       - WEBUI_AUTH_TRUSTED_EMAIL_HEADER=Remote-Email
       - WEBUI_AUTH_TRUSTED_NAME_HEADER=Remote-Name
       - WEBUI_AUTH_TRUSTED_GROUPS_HEADER=Remote-Groups
-      - OLLAMA_BASE_URL=http://${OLLAMA_WIREGUARD_IP}:${OLLAMA_WIREGUARD_PORT:-11434}
+      - OLLAMA_BASE_URL=10.0.0.2:11434
     volumes:
       - openwebui_data:/app/backend/data
+
+# ────────── SEARXNG ──────────
 
   searxng:
     image: searxng/searxng:latest
@@ -171,79 +249,12 @@ services:
       - searxng_cache:/var/cache/searxng
       - ./searxng:/etc/searxng
     environment:
-      - SEARXNG_PORT=${SEARXNG_PORT:-8888}
-      - SEARXNG_BASE_URL=https://searxng.${DOMAIN}/
+      - SEARXNG_PORT=8888
+      - SEARXNG_BASE_URL=https://searxng.mydomain.net/
     networks:
       - internal
 
-# -------- FILE BROWSER --------
-
-  filebrowser-vps:
-    image: filebrowser/filebrowser:v2.44.0
-    container_name: filebrowser-vps
-    restart: unless-stopped
-    environment:
-      - FB_NOAUTH=true
-      - FB_ROOT=/srv
-      - FB_DATABASE=/tmp/database.db
-      - FB_PORT=${FILEBROWSER_VPS_PORT:-8084}
-    volumes:
-      - ~/:/srv
-      - filebrowser_config:/config
-      - filebrowser_database:/database
-    networks:
-      - internal
-
-  filebrowser-padre:
-    image: alpine/socat:1.8.0.3
-    container_name: filebrowser-padre
-    restart: unless-stopped
-    network_mode: "service:wireguard"
-    depends_on:
-      - wireguard
-    command: TCP-LISTEN:${FILEBROWSER_PC_PORT},fork,reuseaddr TCP:${FILEBROWSER_PC_WIREGUARD_IP}:${FILEBROWSER_PC_WIREGUARD_PORT}
-
-  filebrowser-raspberry:
-    image: alpine/socat:1.8.0.3
-    container_name: filebrowser-raspberry
-    restart: unless-stopped
-    network_mode: "service:wireguard"
-    depends_on:
-      - wireguard
-    command: TCP-LISTEN:${FILEBROWSER_RPI_PORT},fork,reuseaddr TCP:${FILEBROWSER_RPI_WIREGUARD_IP}:${FILEBROWSER_RPI_WIREGUARD_PORT}
-
-# -------- JELLYFIN --------
-
-  jellyfin-pc:
-    image: alpine/socat:1.8.0.3
-    container_name: jellyfin-pc
-    restart: unless-stopped
-    network_mode: "service:wireguard"
-    depends_on:
-      - wireguard
-    command: TCP-LISTEN:${JELLYFIN_PC_PORT},fork,reuseaddr TCP:${JELLYFIN_PC_WIREGUARD_IP}:${JELLYFIN_PC_WIREGUARD_PORT}
-
-# -------- TORRENT --------
-
-  torrent-padre:
-    image: alpine/socat:1.8.0.3
-    container_name: torrent-padre
-    restart: unless-stopped
-    network_mode: "service:wireguard"
-    depends_on:
-      - wireguard
-    command: TCP-LISTEN:${TORRENT_PC_PORT},fork,reuseaddr TCP:${TORRENT_PC_WIREGUARD_IP}:${TORRENT_PC_WIREGUARD_PORT}
-
-  torrent-raspberry:
-    image: alpine/socat:1.8.0.3
-    container_name: torrent-raspberry
-    restart: unless-stopped
-    network_mode: "service:wireguard"
-    depends_on:
-      - wireguard
-    command: TCP-LISTEN:${TORRENT_RPI_PORT},fork,reuseaddr TCP:${TORRENT_RPI_WIREGUARD_IP}:${TORRENT_RPI_WIREGUARD_PORT}
-
-# -------- FRONT --------
+# ────────── FRONT ──────────
 
   front:
     container_name: front
@@ -252,21 +263,28 @@ services:
       context: ./dashboard/front
       dockerfile: Dockerfile
       args:
-        - VITE_PORTAINER_DOMAIN=${PORTAINER_DOMAIN}
-        - VITE_GUACAMOLE_DOMAIN=${GUACAMOLE_DOMAIN}
-        - VITE_ACESTEP_DOMAIN=${ACESTEP_DOMAIN}
-        - VITE_COMFYUI_DOMAIN=${COMFYUI_DOMAIN}
-        - VITE_OPENWEBUI_DOMAIN=${OPENWEBUI_DOMAIN}
-        - VITE_FILEBROWSER_VPS_DOMAIN=${FILEBROWSER_VPS_DOMAIN}
-        - VITE_FILEBROWSER_PC_DOMAIN=${FILEBROWSER_PC_DOMAIN}
-        - VITE_FILEBROWSER_RPI_DOMAIN=${FILEBROWSER_RPI_DOMAIN}
-        - VITE_JELLYFIN_PC_DOMAIN=${JELLYFIN_PC_DOMAIN}
-        - VITE_TORRENT_PC_DOMAIN=${TORRENT_PC_DOMAIN}
-        - VITE_TORRENT_RPI_DOMAIN=${TORRENT_RPI_DOMAIN}
+        - VITE_PORTAINER_DOMAIN=portainer.mydomain.net
+        - VITE_UPTIME_KUMA_DOMAIN=kuma.mydomain.net
+        - VITE_GUACAMOLE_DOMAIN=guacamole.mydomain.net
+        - VITE_FILEBROWSER_VPS_DOMAIN=files.vps.mydomain.net
+        - VITE_NAVIDROME_DOMAIN=navidrome.mydomain.net
+        - VITE_ROMM_DOMAIN=romm.mydomain.net
+        - VITE_FILEBROWSER_RPI_DOMAIN=files.rpi.mydomain.net
+        - VITE_TORRENT_RPI_DOMAIN=torrent.rpi.mydomain.net
+        - VITE_FILEBROWSER_PC_DOMAIN=files.pc.mydomain.net
+        - VITE_VSCODE_PC_DOMAIN=vscode.mydomain.net
+        - VITE_NAVIDROME_PC_DOMAIN=navidrome.pc.mydomain.net
+        - VITE_JELLYFIN_PC_DOMAIN=jellyfin.mydomain.net
+        - VITE_TORRENT_PC_DOMAIN=torrent.mydomain.net
+        - VITE_SUNSHINE_PC_DOMAIN=sunshine.mydomain.net
+        - VITE_MOONLIGHT_PC_DOMAIN=moonlight.mydomain.net
+        - VITE_ACESTEP_DOMAIN=acestep.mydomain.net
+        - VITE_COMFYUI_DOMAIN=comfyui.mydomain.net
+        - VITE_OPENWEBUI_DOMAIN=openwebui.mydomain.net
     networks:
       - internal
 
-# -------- API --------
+# ────────── API ──────────
 
   api:
     container_name: api
@@ -281,18 +299,18 @@ services:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
     environment:
-      - ADMIN_USER=${ADMIN_USER}
-      - ADMIN_PASS=${ADMIN_PASS}
+      - ADMIN_USER=guaca_admin
+      - ADMIN_PASS=guaca_pass
       - GUAC_URL=http://172.18.0.1:8080/guacamole
-      - GUAC_PUBLIC_URL=https://${GUACAMOLE_DOMAIN}/guacamole
+      - GUAC_PUBLIC_URL=https://guacamole.mydomain.net/guacamole
       - NODE_ENV=production
-      - PORT=${API_PORT:-4000}
-      - PC_IP=${API_PC_IP}
-      - RPI_IP=${API_RPI_IP}
-      - SSH_USER_PC=${API_PC_USER}
-      - SSH_USER_RPI=${API_RPI_USER}
-      - TELEMETRY_PC_PORT=${API_PC_TELEMETRY_PORT:-8000}
-      - TELEMETRY_RPI_PORT=${API_RPI_TELEMETRY_PORT:-8000}
+      - PORT=4000
+      - PC_IP=10.0.0.2
+      - RPI_IP=10.0.0.3
+      - SSH_USER_PC=user_pc
+      - SSH_USER_RPI=user_rpi
+      - TELEMETRY_PC_PORT=8000
+      - TELEMETRY_RPI_PORT=8000
 
 networks:
   internal:
@@ -302,8 +320,16 @@ volumes:
   caddy_data:
   caddy_config:
   portainer_data:
+  uptime-kuma_data:
+  navidrome_data:
   openwebui_data:
   searxng_cache:
   guacamole_postgres_data:
   filebrowser_config:
   filebrowser_database:
+  romm_config:
+  romm_assets:
+  romm_database:
+  romm_redis_data:
+  romm_library_data:
+  romm_resources_data:

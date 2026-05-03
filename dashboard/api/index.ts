@@ -40,6 +40,7 @@ app.register(telemetryRoutes, { prefix: '/api/telemetry' })
 app.register(vpsRoutes, { prefix: '/api/telemetry' })
 app.register(guacamoleRoutes, { prefix: '/api' })
 app.register(remoteRoutes, { prefix: '/api/remote' })
+app.get('/health', async () => ({ status: 'ok' }))
 
 // -- Start
 try {

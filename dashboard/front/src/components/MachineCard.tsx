@@ -1,12 +1,10 @@
-import { useState, useEffect } from 'react'
+import { Fragment, useState, useEffect } from 'react'
 import StatusBadge from './StatusBadge'
 import ActionButton from './ActionButton'
 import MachineIcon from './MachineIcon'
-import MetricItem from './MetricItem'
 import padreCover from '../assets/hero-padre.svg'
 import rpiCover from '../assets/hero-rpi.svg'
 import vpsCover from '../assets/hero-vps.svg'
-import { type ReactNode } from 'react'
 import { useAction } from '../hooks/useAction.js'
 import { useTelemetry } from '../hooks/useTelemetry.js'
 
@@ -20,6 +18,7 @@ interface MachineCardProps {
     canShutdown?: boolean
     canReboot?: boolean
     telemetry?: 'pc' | 'rpi' | 'vps'
+    globalToggle?: boolean
 }
 
 interface GuacConnection {
@@ -29,7 +28,20 @@ interface GuacConnection {
     url: string
 }
 
+interface LinkItem {
+    label: string
+    url: string
+}
+
 type ConfirmAction = 'shutdown' | 'reboot' | null
+
+type TelemetryTile = {
+    key: string
+    label: string
+    percent: number
+    detail?: string
+    temp?: string
+}
 
 const COVER_BY_ID: Record<string, string> = {
     pc: padreCover,
@@ -37,48 +49,101 @@ const COVER_BY_ID: Record<string, string> = {
     vps: vpsCover,
 }
 
-const formatPercent = (value: number, decimals = 1) => `${value.toFixed(decimals)}%`
+const getTelemetryTone = (percent: number) => {
+    if (percent >= 85) {
+        return {
+            bg: 'bg-offline/8',
+            value: 'text-offline/40',
+        }
+    }
 
-const formatPercentFromString = (value: string, decimals = 1) => formatPercent(parseFloat(value), decimals)
+    if (percent >= 60) {
+        return {
+            bg: 'bg-warning/8',
+            value: 'text-warning/40',
+        }
+    }
 
-const usageColor = (percent: number) => {
-    if (percent >= 85) return 'text-offline/50'
-    if (percent >= 60) return 'text-warning/50'
-    return 'text-online/50'
+    return {
+        bg: 'bg-online/8',
+        value: 'text-online/40',
+    }
 }
 
-const usageBar = (percent: number) => {
-    if (percent >= 85) return 'bg-offline'
-    if (percent >= 60) return 'bg-warning'
-    return 'bg-online'
-}
+const TelemetryTileCard = ({ label, percent, detail, temp }: TelemetryTile) => {
+    const tone = getTelemetryTone(percent)
 
-const Bar = ({ value }: { value: number }) => (
-    <div className="w-full h-px bg-surface-border mt-1 mb-2">
+    return (
         <div
-            className={`h-full ${usageBar(value)} transition-all duration-500`}
-            style={{ width: `${Math.min(value, 100)}%`, opacity: 0.4 }}
-        />
-    </div>
-)
+            className={`inline-flex min-w-0 flex-col rounded-lg ${tone.bg} px-2 py-1.5 select-none`}
+        >
+            <span className="truncate text-[10px] font-semibold uppercase tracking-[0.12em] text-sky-300/60 select-none">
+                {label}
+            </span>
+            <div className="mt-0.5 flex min-w-0 items-end gap-1 leading-none text-left select-none">
+                <span className={`text-[12px] font-black ${tone.value} select-none`}>
+                    {Math.round(percent)}%
+                </span>
+            </div>
+            {detail && (
+                <span className="mt-0.5 truncate text-[8px] font-medium text-accent/35 select-none">
+                    {detail}
+                </span>
+            )}
+            {temp && (
+                <span className="mt-0.5 truncate text-[8px] font-medium text-accent/35 select-none">
+                    {temp}
+                </span>
+            )}
+        </div>
+    )
+}
 
-const TelemetryRow = ({
-    label,
-    value,
-    valueClassName,
-    right,
-}: {
-    label: string
-    value: ReactNode
-    valueClassName: string
-    right: ReactNode
-}) => (
-    <div className="grid grid-cols-[minmax(0,0.5fr)_1.75rem_minmax(0,1.5fr)] items-center gap-x-2 sm:gap-x-4 sm:grid-cols-[minmax(0,1fr)_5rem_minmax(0,1fr)]">
-        <span className="text-accent/40 min-w-0 truncate">{label}</span>
-        <span className={`${valueClassName} w-full min-w-0 overflow-hidden whitespace-nowrap justify-self-center text-center text-xs`}>{value}</span>
-        <span className="text-accent/30 min-w-0 justify-self-end truncate text-right text-xs">{right}</span>
-    </div>
-)
+const buildTelemetryTiles = (tel: NonNullable<ReturnType<typeof useTelemetry>['data']>): TelemetryTile[] => {
+    const tiles: TelemetryTile[] = [
+        {
+            key: 'cpu',
+            label: 'CPU',
+            percent: tel.sistema.cpu_uso_porcentaje,
+            temp: tel.sistema.temperatura_cpu,
+        },
+        {
+            key: 'ram',
+            label: 'RAM',
+            percent: tel.sistema.ram.porcentaje,
+        },
+    ]
+
+    tel.gpus?.forEach((gpu, index) => {
+        const gpuPercent = Number.parseFloat(gpu.uso)
+        const vramPercent = (Number.parseFloat(gpu.vram_uso) / Number.parseFloat(gpu.vram_total)) * 100
+        const suffix = tel.gpus && tel.gpus.length > 1 ? ` ${index + 1}` : ''
+
+        tiles.push(
+            {
+                key: `gpu-${index}`,
+                label: `GPU${suffix}`,
+                percent: gpuPercent,
+                temp: gpu.temp,
+            },
+            {
+                key: `vram-${index}`,
+                label: `VRAM${suffix}`,
+                percent: vramPercent,
+            },
+        )
+    })
+
+    Object.entries(tel.discos).forEach(([mount, disk]) => {
+        tiles.push({
+            key: `disk-${mount}`,
+            label: mount,
+            percent: Number.parseFloat(disk.porcentaje),
+        })
+    })
+
+    return tiles
+}
 
 const ServiceButton = ({
     label,
@@ -118,31 +183,51 @@ const toHttpsUrl = (domain: string | undefined, key: string, path = '') => {
     return `https://${host}${path}`
 }
 
-// ─── Links estáticos (Files, servicios, AI) ───────────────────────────────────
-const SERVICE_LINKS: Record<string, { label: string; url: string }[]> = {
-    pc:  [{ label: 'Files',     url: toHttpsUrl(import.meta.env.VITE_FILEBROWSER_PC_DOMAIN, 'VITE_FILEBROWSER_PC_DOMAIN') },
-		{ label: 'Jellyfin',   url: toHttpsUrl(import.meta.env.VITE_JELLYFIN_PC_DOMAIN, 'VITE_JELLYFIN_PC_DOMAIN') },
-        { label: 'Torrent',   url: toHttpsUrl(import.meta.env.VITE_TORRENT_PC_DOMAIN, 'VITE_TORRENT_PC_DOMAIN') }],
-    rpi: [{ label: 'Files',     url: toHttpsUrl(import.meta.env.VITE_FILEBROWSER_RPI_DOMAIN, 'VITE_FILEBROWSER_RPI_DOMAIN') },
-        { label: 'Torrent',   url: toHttpsUrl(import.meta.env.VITE_TORRENT_RPI_DOMAIN, 'VITE_TORRENT_RPI_DOMAIN') }],
-    vps: [{ label: 'Files',     url: toHttpsUrl(import.meta.env.VITE_FILEBROWSER_VPS_DOMAIN, 'VITE_FILEBROWSER_VPS_DOMAIN') },
-        { label: 'Portainer', url: toHttpsUrl(import.meta.env.VITE_PORTAINER_DOMAIN, 'VITE_PORTAINER_DOMAIN') }],
+// ─── Enlaces estáticos por máquina y categoría ──────────────────────────────
+const FILE_LINKS_BY_MACHINE: Record<string, LinkItem[]> = {
+    pc: [{ label: 'Files', url: toHttpsUrl(import.meta.env.VITE_FILEBROWSER_PC_DOMAIN, 'VITE_FILEBROWSER_PC_DOMAIN') }],
+    rpi: [{ label: 'Files', url: toHttpsUrl(import.meta.env.VITE_FILEBROWSER_RPI_DOMAIN, 'VITE_FILEBROWSER_RPI_DOMAIN') }],
+    vps: [{ label: 'Files', url: toHttpsUrl(import.meta.env.VITE_FILEBROWSER_VPS_DOMAIN, 'VITE_FILEBROWSER_VPS_DOMAIN') }],
 }
 
-const AI_LINKS: Record<string, { label: string; url: string }[]> = {
+const DEVELOPMENT_LINKS_BY_MACHINE: Record<string, LinkItem[]> = {
     pc: [
-		{ label: 'Ace Step',   url: toHttpsUrl(import.meta.env.VITE_ACESTEP_DOMAIN, 'VITE_ACESTEP_DOMAIN') },
-        { label: 'ComfyUI',    url: toHttpsUrl(import.meta.env.VITE_COMFYUI_DOMAIN, 'VITE_COMFYUI_DOMAIN') },
-        { label: 'Open WebUI', url: toHttpsUrl(import.meta.env.VITE_OPENWEBUI_DOMAIN, 'VITE_OPENWEBUI_DOMAIN') },
-        // {
-        //     label: 'OpenClaw',
-        //     url: toHttpsUrl(
-        //         import.meta.env.VITE_OPENCLAW_DOMAIN,
-        //         'VITE_OPENCLAW_DOMAIN',
-        //         `/#token=${requiredEnv(import.meta.env.VITE_OPENCLAW_TOKEN, 'VITE_OPENCLAW_TOKEN')}`,
-        //     ),
-        // },
+		{ label: 'VSCode', url: toHttpsUrl(import.meta.env.VITE_VSCODE_PC_DOMAIN, 'VITE_VSCODE_PC_DOMAIN') },
+		{ label: 'GitHub', url: toHttpsUrl('github.com/Kobayashi82') },
+	],
+}
+
+const MULTIMEDIA_LINKS_BY_MACHINE: Record<string, LinkItem[]> = {
+    pc: [
+        { label: 'Navidrome', url: toHttpsUrl(import.meta.env.VITE_NAVIDROME_PC_DOMAIN, 'VITE_NAVIDROME_PC_DOMAIN') },
+        { label: 'Jellyfin', url: toHttpsUrl(import.meta.env.VITE_JELLYFIN_PC_DOMAIN, 'VITE_JELLYFIN_PC_DOMAIN') },
+        { label: 'Torrent', url: toHttpsUrl(import.meta.env.VITE_TORRENT_PC_DOMAIN, 'VITE_TORRENT_PC_DOMAIN') },
     ],
+    rpi: [{ label: 'Torrent', url: toHttpsUrl(import.meta.env.VITE_TORRENT_RPI_DOMAIN, 'VITE_TORRENT_RPI_DOMAIN') }],
+	vps: [{ label: 'Navidrome', url: toHttpsUrl(import.meta.env.VITE_NAVIDROME_DOMAIN, 'VITE_NAVIDROME_DOMAIN') }],
+}
+
+const GAMING_LINKS_BY_MACHINE: Record<string, LinkItem[]> = {
+    pc: [
+        { label: 'Sunshine', url: toHttpsUrl(import.meta.env.VITE_SUNSHINE_PC_DOMAIN, 'VITE_SUNSHINE_PC_DOMAIN') },
+        { label: 'Moonlight', url: toHttpsUrl(import.meta.env.VITE_MOONLIGHT_PC_DOMAIN, 'VITE_MOONLIGHT_PC_DOMAIN') },
+    ],
+	vps: [{ label: 'RomM', url: toHttpsUrl(import.meta.env.VITE_ROMM_DOMAIN, 'VITE_ROMM_DOMAIN', '/console') }],
+}
+
+const AI_LINKS_BY_MACHINE: Record<string, LinkItem[]> = {
+    pc: [
+        { label: 'ACE Step', url: toHttpsUrl(import.meta.env.VITE_ACESTEP_DOMAIN, 'VITE_ACESTEP_DOMAIN') },
+        { label: 'ComfyUI', url: toHttpsUrl(import.meta.env.VITE_COMFYUI_DOMAIN, 'VITE_COMFYUI_DOMAIN') },
+        { label: 'Open WebUI', url: toHttpsUrl(import.meta.env.VITE_OPENWEBUI_DOMAIN, 'VITE_OPENWEBUI_DOMAIN') },
+    ],
+}
+
+const MONITOR_LINKS_BY_MACHINE: Record<string, LinkItem[]> = {
+    vps: [
+		{ label: 'Portainer', url: toHttpsUrl(import.meta.env.VITE_PORTAINER_DOMAIN, 'VITE_PORTAINER_DOMAIN') },
+		{ label: 'Uptime Kuma', url: toHttpsUrl(import.meta.env.VITE_UPTIME_KUMA_DOMAIN, 'VITE_UPTIME_KUMA_DOMAIN') },
+	],
 }
 
 // ─── Cache compartida entre cards ─────────────────────────────────────────────
@@ -171,14 +256,17 @@ export default function MachineCard({
     canShutdown,
     canReboot,
     telemetry,
+    globalToggle,
 }: MachineCardProps) {
     const [confirmAction, setConfirmAction]   = useState<ConfirmAction>(null)
     const [showCommands, setShowCommands]     = useState(false)
-    const [showTelemetry, setShowTelemetry]   = useState(false)
     const [showPower, setShowPower]           = useState(false)
     const [showAccess, setShowAccess]         = useState(false)
-    const [showServices, setShowServices]     = useState(false)
+    const [showDevelopment, setShowDevelopment] = useState(false)
+    const [showMultimedia, setShowMultimedia] = useState(false)
+    const [showGaming, setShowGaming]         = useState(false)
     const [showAi, setShowAi]                 = useState(false)
+    const [showMonitor, setShowMonitor]       = useState(false)
     const [commands, setCommands]             = useState<string[]>([])
     const [cmdLoading, setCmdLoading]         = useState(false)
     const [executingCmd, setExecutingCmd]     = useState<string | null>(null)
@@ -190,9 +278,78 @@ export default function MachineCard({
 
     const { data: tel } = useTelemetry(telemetry as 'pc' | 'rpi', !!telemetry && online)
 
-    const serviceLinks = (SERVICE_LINKS[id] ?? []).filter((link) => Boolean(link.url))
-    const aiLinks      = (AI_LINKS[id] ?? []).filter((link) => Boolean(link.url))
     const coverImage   = COVER_BY_ID[id] ?? padreCover
+    const accessLinkByType = (type: string) => accessLinks.find((connection) => connection.type.toLowerCase() === type)
+    const telemetryTiles = telemetry && online && tel ? buildTelemetryTiles(tel) : []
+
+    const accessSectionLinks = [
+        ...(FILE_LINKS_BY_MACHINE[id] ?? []),
+        ...(accessLinkByType('ssh') ? [{ label: 'SSH', url: accessLinkByType('ssh')!.url }] : []),
+        ...(accessLinkByType('vnc') ? [{ label: 'VNC', url: accessLinkByType('vnc')!.url }] : []),
+        ...(accessLinkByType('rdp') ? [{ label: 'RDP', url: accessLinkByType('rdp')!.url }] : []),
+    ]
+    const developmentLinks = DEVELOPMENT_LINKS_BY_MACHINE[id] ?? []
+    const multimediaLinks = MULTIMEDIA_LINKS_BY_MACHINE[id] ?? []
+    const gamingLinks = GAMING_LINKS_BY_MACHINE[id] ?? []
+    const aiLinks = AI_LINKS_BY_MACHINE[id] ?? []
+    const monitorLinks = MONITOR_LINKS_BY_MACHINE[id] ?? []
+
+    const sections = [
+        {
+            key: 'access',
+            title: 'Access',
+            icon: '🗝️',
+            open: showAccess,
+            setOpen: setShowAccess,
+            links: accessSectionLinks,
+            buttonClass: 'btn-service-access',
+        },
+        {
+            key: 'development',
+            title: 'Development',
+            icon: '🛠️',
+            open: showDevelopment,
+            setOpen: setShowDevelopment,
+            links: developmentLinks,
+            buttonClass: 'btn-service-development',
+        },
+        {
+            key: 'multimedia',
+            title: 'Multimedia',
+            icon: '🎬',
+            open: showMultimedia,
+            setOpen: setShowMultimedia,
+            links: multimediaLinks,
+            buttonClass: 'btn-service-services',
+        },
+        {
+            key: 'gaming',
+            title: 'Gaming',
+            icon: '🎮',
+            open: showGaming,
+            setOpen: setShowGaming,
+            links: gamingLinks,
+            buttonClass: 'btn-service-gaming',
+        },
+        {
+            key: 'ai',
+            title: 'AI',
+            icon: '🪄',
+            open: showAi,
+            setOpen: setShowAi,
+            links: aiLinks,
+            buttonClass: 'btn-service-ai',
+        },
+        {
+            key: 'monitor',
+            title: 'Monitor',
+            icon: '📈',
+            open: showMonitor,
+            setOpen: setShowMonitor,
+            links: monitorLinks,
+            buttonClass: 'btn-service-monitor',
+        },
+    ]
 
     // ─── Cargar conexiones Guacamole ──────────────────────────────────────────
     useEffect(() => {
@@ -200,6 +357,23 @@ export default function MachineCard({
             .then(all => setAccessLinks(all.filter(c => c.machine === id)))
             .catch(err => console.error('Error fetching Guacamole connections', err))
     }, [id])
+
+    // ─── Responder a cambios en globalToggle ───────────────────────────────────
+    useEffect(() => {
+        if (globalToggle !== undefined) {
+            setShowPower(globalToggle)
+            setShowAccess(globalToggle)
+            setShowDevelopment(globalToggle)
+            setShowMultimedia(globalToggle)
+            setShowGaming(globalToggle)
+            setShowAi(globalToggle)
+            setShowMonitor(globalToggle)
+            if (globalToggle && id === 'pc' && online && commands.length === 0) {
+                fetchCommands()
+            }
+            setShowCommands(globalToggle)
+        }
+    }, [globalToggle])
 
     // ─── Comandos remotos ─────────────────────────────────────────────────────
     const fetchCommands = async () => {
@@ -244,43 +418,75 @@ export default function MachineCard({
         if (action === 'reboot')   await reboot.execute()
     }
 
+    const toggleAllSections = () => {
+        const hasPower = Boolean(canWake || canShutdown || canReboot)
+        const hasCommands = id === 'pc' && online
+
+        const allExpanded =
+            (!hasPower || showPower) &&
+            sections.every((section) => section.links.length === 0 || section.open) &&
+            (!hasCommands || showCommands)
+
+        const nextState = !allExpanded
+
+        if (hasPower) setShowPower(nextState)
+        sections.forEach((section) => {
+            if (section.links.length > 0) section.setOpen(nextState)
+        })
+        if (hasCommands) {
+            if (nextState && commands.length === 0) fetchCommands()
+            setShowCommands(nextState)
+        }
+    }
+
     return (
-        <div className="machine-card group flex flex-col gap-4">
+        <div className={`machine-card group flex flex-col gap-4 ${online ? 'machine-card-online' : 'machine-card-offline'}`}>
             {/* <div
                 className="h-28 w-full rounded-xl overflow-hidden border border-surface-border/50 bg-cover bg-center"
                 style={{ backgroundImage: `url(${coverImage})` }}
             /> */}
             {/* Header con Icono */}
-            <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-4 flex-1 min-w-0">
-                    {/* Machine Icon */}
-                    <div className="flex-shrink-0 opacity-80 group-hover:opacity-100 transition-opacity duration-300 scale-90 -mr-2 -translate-y-2">
-                        <MachineIcon machine={id as 'pc' | 'rpi' | 'vps'} size="md" />
-                    </div>
-                    {/* Title and Subtitle */}
-                    <div className="flex-1 min-w-0">
-                        <div className="text-[10px] text-accent/40 tracking-widest uppercase font-semibold mb-1">{subtitle}</div>
-                        {/* <h2 className="text-xl font-black tracking-wider uppercase glow truncate">{label}</h2> */}
-						<h2 className="text-xl font-black tracking-wider uppercase truncate">{label}</h2>
-                    </div>
-                </div>
-                {/* Status Badge */}
-                <div className="flex-shrink-0">
+            <div className="flex flex-col gap-1">
+                <div className="flex justify-start pl-0.5">
                     <StatusBadge online={online} loading={statusLoading} />
                 </div>
+                <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 opacity-80 group-hover:opacity-100 transition-opacity duration-300 scale-90 -mr-3">
+                        <MachineIcon machine={id as 'pc' | 'rpi' | 'vps'} size="md" />
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-0.5 pt-0.5">
+                        <div className="text-[10px] text-accent/35 tracking-[0.18em] uppercase font-semibold mb-0.5 select-none">{subtitle}</div>
+                        <button
+                            type="button"
+                            onClick={toggleAllSections}
+							className="flex-none text-left text-[1.45rem] font-black tracking-wider uppercase truncate text-accent/70 hover:text-accent/90 transition-colors select-none touch-manipulation"
+                            aria-label={`Toggle all sections for ${label}`}
+                        >
+                            {label}
+                        </button>
+                    </div>
+                </div>
             </div>
+
+            {telemetryTiles.length > 0 && (
+                <div className="-mt-4 flex flex-wrap items-start gap-1">
+                    {telemetryTiles.map((tile) => (
+                        <TelemetryTileCard key={tile.key} {...tile} />
+                    ))}
+                </div>
+            )}
 
             {/* Power Controls */}
             {(canWake || canShutdown || canReboot) && (
                 <>
                     <div className="border-t border-surface-border/50" />
-                    <div>
+                    <div className="pt-2">
                         <button
                             type="button"
                             onClick={() => setShowPower(!showPower)}
-                            className="w-full text-xs font-bold text-accent/50 tracking-widest uppercase mb-3 flex items-center gap-2 hover:text-accent/70 transition-colors"
+                            className="w-full text-sm font-semibold text-accent/70 tracking-widest uppercase mb-3 flex items-center gap-2 transition-colors duration-200"
                         >
-                            <span className="text-accent text-base">⚡</span>
+                            <span className="text-accent text-lg">⚡</span>
                             <span>Power</span>
                             {/* <span className="text-[10px] opacity-50">{showPower ? '▼' : '▶'}</span> */}
                         </button>
@@ -301,93 +507,47 @@ export default function MachineCard({
                 </>
             )}
 
-            {/* Access (Guacamole) */}
-            {accessLinks.length > 0 && (
-                <>
+            {sections.map((section) => section.links.length > 0 && (
+                <Fragment key={section.key}>
                     <div className="border-t border-surface-border/50" />
-                    <div>
+                    <div className="pt-2">
                         <button
                             type="button"
-                            onClick={() => setShowAccess(!showAccess)}
-                            className="w-full text-xs font-bold text-accent/50 tracking-widest uppercase mb-3 flex items-center gap-2 hover:text-accent/70 transition-colors"
+                            onClick={() => section.setOpen(!section.open)}
+                            className="w-full text-sm font-semibold text-accent/70 tracking-widest uppercase mb-3 flex items-center gap-2 transition-colors duration-200"
                         >
-                            <span className="text-accent text-base">🗝️</span>
-                            <span>Access</span>
-                            {/* <span className="text-[10px] opacity-50">{showAccess ? '▼' : '▶'}</span> */}
+                            <span className="text-accent text-lg">{section.icon}</span>
+                            <span>{section.title}</span>
                         </button>
-                        {showAccess && (
+                        {section.open && (
                             <div className="flex flex-wrap gap-2">
-                                {accessLinks.map(c => (
-                                    <ServiceButton key={c.url} label={c.type} url={c.url} disabled={!online} className="btn-service-services" />
+                                {section.links.map((link) => (
+                                    <ServiceButton
+                                        key={link.url}
+                                        label={link.label}
+                                        url={link.url}
+                                        disabled={!online}
+                                        className={section.buttonClass}
+                                    />
                                 ))}
                             </div>
                         )}
                     </div>
-                </>
-            )}
-
-            {/* Services */}
-            {serviceLinks.length > 0 && (
-                <>
-                    <div className="border-t border-surface-border/50" />
-                    <div>
-                        <button
-                            type="button"
-                            onClick={() => setShowServices(!showServices)}
-                            className="w-full text-xs font-bold text-accent/50 tracking-widest uppercase mb-3 flex items-center gap-2 hover:text-accent/70 transition-colors"
-                        >
-                            <span className="text-accent text-base">✨</span>
-                            <span>Services</span>
-                            {/* <span className="text-[10px] opacity-50">{showServices ? '▼' : '▶'}</span> */}
-                        </button>
-                        {showServices && (
-                            <div className="flex flex-wrap gap-2">
-                                {serviceLinks.map(svc => (
-                                    <ServiceButton key={svc.url} label={svc.label} url={svc.url} disabled={!online} className="btn-service-ai" />
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </>
-            )}
-
-            {/* AI */}
-            {aiLinks.length > 0 && (
-                <>
-                    <div className="border-t border-surface-border/50" />
-                    <div>
-                        <button
-                            type="button"
-                            onClick={() => setShowAi(!showAi)}
-                            className="w-full text-xs font-bold text-accent/50 tracking-widest uppercase mb-3 flex items-center gap-2 hover:text-accent/70 transition-colors"
-                        >
-                            <span className="text-accent text-base">🪄</span>
-                            <span>AI</span>
-                            {/* <span className="text-[10px] opacity-50">{showAi ? '▼' : '▶'}</span> */}
-                        </button>
-                        {showAi && (
-                            <div className="flex flex-wrap gap-2">
-                                {aiLinks.map(svc => (
-                                    <ServiceButton key={svc.url} label={svc.label} url={svc.url} disabled={!online} className="btn-service-access" />
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </>
-            )}
+                </Fragment>
+            ))}
 
             {/* Remote Commands */}
 			{id === 'pc' && online && (
 				<>
 					<div className="border-t border-surface-border/50" />
-					<div>
+                    <div className="pt-2">
 						<div className="flex items-center justify-between mb-3">
 							<button
 								type="button"
 								onClick={toggleCommands}
-								className="w-full text-xs font-bold text-accent/50 tracking-widest uppercase hover:text-accent/70 flex items-center gap-2 transition-colors"
+                            className="w-full text-sm font-semibold text-accent/70 tracking-widest uppercase flex items-center gap-2 transition-colors duration-200"
 							>
-								<span className="text-accent text-base">📲</span>
+								<span className="text-accent text-lg">📲</span>
 								<span>Commands</span>
 								{/* <span className="text-[10px] opacity-50">{showCommands ? '▼' : '▶'}</span> */}
 							</button>
@@ -449,74 +609,6 @@ export default function MachineCard({
 					</div>
 				</>
 			)}
-                {/* Telemetry - Enhanced */}
-                {telemetry && online && tel && (
-                    <>
-                        <div className="border-t border-surface-border/50" />
-                        <div>
-                            <button
-                                type="button"
-                                onClick={() => setShowTelemetry(!showTelemetry)}
-                                className="w-full text-xs font-bold text-accent/50 tracking-widest uppercase mb-4 flex items-center gap-2 hover:text-accent/70 transition-colors"
-                            >
-                                <span className="text-accent text-base">📡</span>
-                                <span>Telemetry</span>
-                                {/* <span className="text-[10px] opacity-50">{showTelemetry ? '▼' : '▶'}</span> */}
-                            </button>
-                            {showTelemetry && (
-                                <div className="space-y-5">
-                                    {/* CPU Metrics */}
-                                    <MetricItem
-                                        label="CPU"
-                                        value={tel.sistema.cpu_uso_porcentaje}
-                                        unit="%"
-                                        temp={tel.sistema.temperatura_cpu}
-                                    />
-
-                                    {/* RAM Metrics */}
-                                    <MetricItem
-                                        label="Memory"
-                                        value={tel.sistema.ram.usado_gb}
-                                        max={tel.sistema.ram.total_gb}
-                                        displayText={`${tel.sistema.ram.usado_gb.toFixed(1)} GB / ${tel.sistema.ram.total_gb.toFixed(1)} GB`}
-                                    />
-
-                                    {/* GPU Metrics */}
-                                    {tel.gpus?.map((gpu, i) => {
-                                        const vramPercent = (parseFloat(gpu.vram_uso) / parseFloat(gpu.vram_total)) * 100
-                                        return (
-                                            <div key={i} className="space-y-3">
-                                                <MetricItem
-                                                    label={`GPU ${tel.gpus!.length > 1 ? i + 1 : ''}`}
-                                                    value={parseFloat(gpu.uso)}
-                                                    unit="%"
-                                                    temp={gpu.temp}
-                                                />
-
-                                                <MetricItem
-                                                    label="VRAM"
-                                                    value={vramPercent}
-                                                    displayText={`${gpu.vram_uso} / ${gpu.vram_total}`}
-                                                />
-                                            </div>
-                                        )
-                                    })}
-
-                                    {/* Storage Metrics */}
-                                    {Object.entries(tel.discos).map(([mount, disk]) => (
-                                        <MetricItem
-                                            key={mount}
-                                            label={mount}
-                                            value={parseFloat(disk.porcentaje)}
-                                            unit="%"
-                                            displayText={`${disk.usado} / ${disk.total}`}
-                                        />
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    </>
-                )}
 
             {/* Confirm modal */}
             {confirmAction && (
@@ -534,7 +626,7 @@ export default function MachineCard({
                                 {confirmAction === 'shutdown' ? 'Shutdown' : 'Reboot'} {label}?
                             </h3>
                         </div>
-                        <p className="text-xs text-accent/50 font-mono leading-relaxed">
+                        <p className="text-xs text-accent/50 font-sans leading-relaxed">
                             ! This action will {confirmAction === 'shutdown' ? 'power off' : 'restart'} the machine.
                             {confirmAction === 'shutdown' && ' You will need to wake it manually afterwards.'}
                         </p>

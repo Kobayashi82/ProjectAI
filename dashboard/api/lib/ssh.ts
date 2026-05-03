@@ -9,6 +9,7 @@ interface SSHTarget {
 export async function runSSHCommand(target: SSHTarget, command: string, expectDisconnect = false, retries = 3): Promise<string> {
     for (let attempt = 1; attempt <= retries; attempt++) {
         const ssh = new NodeSSH()
+        let commandIssued = false
         try {
             await ssh.connect({
                 host: target.host,
@@ -18,8 +19,22 @@ export async function runSSHCommand(target: SSHTarget, command: string, expectDi
             })
 
             if (expectDisconnect) {
-                ssh.connection?.exec(command, () => {})
-                await new Promise(res => setTimeout(res, 500))
+                const connection = ssh.connection
+                if (!connection) throw new Error('SSH connection unavailable')
+
+                await new Promise<void>((resolve, reject) => {
+                    connection.exec(command, (error) => {
+                        if (error) {
+                            reject(error)
+                            return
+                        }
+
+                        commandIssued = true
+
+                        // -- Reboot/shutdown should drop the session shortly after the command is accepted.
+                        setTimeout(resolve, 500)
+                    })
+                })
                 return ''
             }
 
@@ -27,7 +42,7 @@ export async function runSSHCommand(target: SSHTarget, command: string, expectDi
             if (result.code !== 0 && result.stderr) throw new Error(result.stderr)
             return result.stdout
         } catch (error) {
-            if (expectDisconnect) return ''
+            if (expectDisconnect && commandIssued) return ''
             if (attempt < retries) {
                 console.warn(`SSH attempt ${attempt} failed, retrying...`)
                 continue

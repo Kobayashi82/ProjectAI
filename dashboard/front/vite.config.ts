@@ -8,6 +8,6 @@ export default defineConfig({
 	server: {
 		host: '0.0.0.0',
     port: 80,
-    allowedHosts: ['kobayashi82.net']
+    allowedHosts: ['mydomain.net', 'front']
 	},
 })

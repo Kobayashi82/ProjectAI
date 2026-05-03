@@ -16,9 +16,9 @@ export default function ActionButton({ label, onClick, loading, danger, disabled
 			{loading ? (
 				// -- Show animated dots while waiting for response
 				<span className="flex items-center gap-1">
-					<span className="animate-blink">●</span>
-					<span className="animate-blink [animation-delay:0.2s]">●</span>
-					<span className="animate-blink [animation-delay:0.4s]">●</span>
+					<span className="animate-blink motion-reduce:animate-none">●</span>
+					<span className="animate-blink motion-reduce:animate-none [animation-delay:0.2s]">●</span>
+					<span className="animate-blink motion-reduce:animate-none [animation-delay:0.4s]">●</span>
 				</span>
 			) : (
 				label

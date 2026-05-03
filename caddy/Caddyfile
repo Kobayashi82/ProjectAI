@@ -1,0 +1,238 @@
+# -------- CADDY --------
+
+www.mydomain.net {
+    redir https://mydomain.net{uri}
+}
+
+mydomain.net {
+    forward_auth authelia:9091 {
+        uri /api/authz/forward-auth
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+    }
+
+    @api path /api*
+    reverse_proxy @api wireguard:4000
+
+    reverse_proxy front:80
+}
+
+# -------- AUTHELIA --------
+
+auth.mydomain.net {
+    reverse_proxy authelia:9091
+}
+
+# -------- PORTAINER --------
+
+portainer.mydomain.net {
+    forward_auth authelia:9091 {
+        uri /api/authz/forward-auth
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+    }
+    reverse_proxy portainer:9000
+}
+
+# -------- UPTIME_KUMA --------
+
+kuma.mydomain.net {
+    forward_auth authelia:9091 {
+        uri /api/authz/forward-auth
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+    }
+    reverse_proxy uptime-kuma:3001
+}
+
+# -------- GUACAMOLE --------
+
+guacamole.mydomain.net {
+    forward_auth authelia:9091 {
+        uri /api/authz/forward-auth
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+    }
+
+    @root path /
+    redir @root /guacamole/ 302
+
+    reverse_proxy guacamole:8080 {
+        header_up Remote-Email {http.request.header.Remote-Email}
+        header_up Remote-Name {http.request.header.Remote-Name}
+        header_up Remote-User {http.request.header.Remote-User}
+        header_up Remote-Groups {http.request.header.Remote-Groups}
+    }
+}
+
+# -------- VSCODE --------
+
+vscode.mydomain.net {
+    forward_auth authelia:9091 {
+        uri /api/authz/forward-auth
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+    }
+	reverse_proxy wireguard:7777
+}
+
+# -------- NAVIDROME --------
+
+navidrome.mydomain.net {
+	reverse_proxy navidrome:4533
+}
+
+navidrome.pc.mydomain.net {
+    forward_auth authelia:9091 {
+        uri /api/authz/forward-auth
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+    }
+	reverse_proxy wireguard:7775
+}
+
+# -------- ROMM --------
+
+romm.mydomain.net {
+    forward_auth authelia:9091 {
+        uri /api/authz/forward-auth
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+    }
+    reverse_proxy romm:8080
+}
+
+# -------- OPEN WEBUI --------
+
+openwebui.mydomain.net {
+    forward_auth authelia:9091 {
+        uri /api/authz/forward-auth
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+    }
+
+    reverse_proxy wireguard:8081 {
+        header_up Remote-Email {http.request.header.Remote-Email}
+        header_up Remote-Name {http.request.header.Remote-Name}
+        header_up Remote-User {http.request.header.Remote-User}
+        header_up Remote-Groups {http.request.header.Remote-Groups}
+    }
+}
+
+# -------- SEARXNG --------
+
+searxng.mydomain.net {
+    forward_auth authelia:9091 {
+        uri /api/authz/forward-auth
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+    }
+    reverse_proxy searxng:8888
+}
+
+# -------- COMFYUI --------
+
+comfyui.mydomain.net {
+    encode zstd gzip
+
+    @websockets {
+        header Upgrade websocket
+    }
+
+    @assets {
+        path /assets/*
+    }
+
+    handle @websockets {
+        reverse_proxy wireguard:8188 {
+            flush_interval -1
+        }
+    }
+
+    handle @assets {
+        reverse_proxy wireguard:8188 {
+            flush_interval -1
+        }
+    }
+
+    handle {
+        forward_auth authelia:9091 {
+            uri /api/authz/forward-auth
+            copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+        }
+        reverse_proxy wireguard:8188 {
+            flush_interval -1
+        }
+    }
+}
+
+# -------- ACE STEP --------
+
+acestep.mydomain.net {
+    forward_auth authelia:9091 {
+        uri /api/authz/forward-auth
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+    }
+    reverse_proxy wireguard:7860
+}
+
+# -------- FILE BROWSER --------
+
+files.vps.mydomain.net {
+    forward_auth authelia:9091 {
+        uri /api/authz/forward-auth
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+    }
+    reverse_proxy filebrowser-vps:8085
+}
+
+files.pc.mydomain.net {
+    forward_auth authelia:9091 {
+        uri /api/authz/forward-auth
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+    }
+    reverse_proxy wireguard:8085
+}
+
+files.rpi.mydomain.net {
+    forward_auth authelia:9091 {
+        uri /api/authz/forward-auth
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+    }
+    reverse_proxy wireguard:8086
+}
+
+# -------- TORRENT --------
+
+torrent.mydomain.net {
+    forward_auth authelia:9091 {
+        uri /api/authz/forward-auth
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+    }
+    reverse_proxy wireguard:8898
+}
+
+torrent.rpi.mydomain.net {
+    forward_auth authelia:9091 {
+        uri /api/authz/forward-auth
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+    }
+    reverse_proxy wireguard:8899
+}
+
+# -------- JELLYFIN --------
+
+jellyfin.mydomain.net {
+    reverse_proxy wireguard:8096
+}
+
+# -------- SUNSHINE --------
+
+sunshine.mydomain.net {
+    forward_auth authelia:9091 {
+        uri /api/authz/forward-auth
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+    }
+    reverse_proxy https://wireguard:47990 {
+		transport http {
+			tls_insecure_skip_verify
+		}
+	}
+}
+
+# -------- MOONLIGHT --------
+
+moonlight.mydomain.net {
+    reverse_proxy wireguard:7891
+}

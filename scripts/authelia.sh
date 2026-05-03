@@ -1,14 +1,15 @@
 #!/bin/bash
 
-set -a
-source .env
-set +a
+export DOMAIN=mydomain.net
+export AUTHELIA_USER=user
+export AUTHELIA_PASS=pass
+export AUTHELIA_DOMAIN=auth.${DOMAIN}
 
 if [ ! -f authelia/configuration.yml ]; then
-	# Generate configuration.yml
+    mkdir -p authelia
     cat > authelia/configuration.yml <<EOF
 server:
-  address: tcp://0.0.0.0:$AUTHELIA_PORT
+  address: tcp://0.0.0.0:9091
   endpoints:
     authz:
       forward-auth:
@@ -67,7 +68,6 @@ EOF
 fi
 
 if [ ! -f authelia/users.yml ]; then
-	# Generate password hash
 	HASH=$(docker run --rm authelia/authelia:4.39 authelia crypto hash generate bcrypt --password "$AUTHELIA_PASS" | grep 'Digest:' | awk '{print $2}')
 
 	# Generate users.yml

@@ -1,19 +1,6 @@
 import type { FastifyInstance } from 'fastify'
-import { isReachable } from '../lib/ping.js'
-import { isPortOpen } from '../lib/portCheck.js'
+import { isMachineOnline } from '../lib/machineOnline.js'
 import { config } from '../config.js'
-
-async function isMachineOnline(host: string): Promise<boolean> {
-	try {
-		await Promise.any([
-			isReachable(host).then((online) => online || Promise.reject(new Error('offline'))),
-			isPortOpen(host, 22, 1000).then((online) => online || Promise.reject(new Error('offline'))),
-		])
-		return true
-	} catch {
-		return false
-	}
-}
 
 // -- Filters and renames RPi disk entries
 function cleanRpiDisks(data: any) {
@@ -41,7 +28,7 @@ async function fetchTelemetry(ip: string, port: number): Promise<unknown> {
 
 export async function telemetryRoutes(app: FastifyInstance) {
 	// -- GET /api/telemetry/pc
-	// -- Pings the PC first. If offline, returns early without calling the agent.
+	// -- Checks the PC SSH port first. If offline, returns early without calling the agent.
 	app.get('/pc', async () => {
 		const online = await isMachineOnline(config.PC_IP)
 		if (!online) return { online: false, data: null }
@@ -55,7 +42,7 @@ export async function telemetryRoutes(app: FastifyInstance) {
 	})
 
 	// -- GET /api/telemetry/rpi
-	// -- Pings the RPi first. If offline, returns early without calling the agent.
+	// -- Checks the RPi SSH port first. If offline, returns early without calling the agent.
 	app.get('/rpi', async () => {
 		const online = await isMachineOnline(config.RPI_IP)
 		if (!online) return { online: false, data: null }

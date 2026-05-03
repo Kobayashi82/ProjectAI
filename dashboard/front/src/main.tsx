@@ -4,6 +4,8 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App.js'
 import './index.css'
 
+document.body.classList.add('no-motion')
+
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>
 		<BrowserRouter>

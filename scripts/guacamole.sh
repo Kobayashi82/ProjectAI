@@ -2,9 +2,49 @@
 
 set -euo pipefail
 
+# API
+export API_SSH_KEY=pc
+export API_PC_USER=user_pc
+export API_RPI_USER=user_rpi
+
+# GUACAMOLE
+export CON1_NAME=PC-SSH
+export CON1_TYPE=SSH
+export CON1_KEY=pc
+export CON1_HOST=10.0.0.2
+export CON1_PORT=22
+export CON1_USER=user
+
+export CON2_NAME=PC-VNC
+export CON2_TYPE=VNC
+export CON2_HOST=10.0.0.2
+export CON2_PORT=5900
+export CON2_PASS=pass
+
+export CON3_NAME=PC-RDP
+export CON3_TYPE=RDP
+export CON3_HOST=10.0.0.2
+export CON3_PORT=3389
+export CON3_USER=user
+export CON3_PASS=pass
+export CON3_DOMAIN=pc
+
+export CON4_NAME=RPI-SSH
+export CON4_TYPE=SSH
+export CON4_KEY=rpi
+export CON4_HOST=10.0.0.3
+export CON4_PORT=22
+export CON4_USER=user
+
+export CON5_NAME=VPS-SSH
+export CON5_TYPE=SSH
+export CON5_KEY=vps
+export CON5_HOST=public_ip
+export CON5_PORT=22
+export CON5_USER=user
+
 # ─── Rutas ────────────────────────────────────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ENV_FILE="${SCRIPT_DIR}/../.env"
 KEYS_DIR="${SCRIPT_DIR}/keys"
 OUTPUT_DIR="${SCRIPT_DIR}/../guacamole"
 OUTPUT_FILE="${OUTPUT_DIR}/002-seed-connections.sql"
@@ -32,18 +72,7 @@ else
   echo "[INFO] $INITDB_FILE ya existe, no se regenera."
 fi
 
-# ─── Validaciones ─────────────────────────────────────────────────────────────
-[[ -f "$ENV_FILE" ]]  || { echo "[ERROR] No se encuentra .env en $ENV_FILE";  exit 1; }
-
 [[ -d "$OUTPUT_DIR" ]] || mkdir -p "$OUTPUT_DIR"
-
-# ─── Carga el .env (ignora comentarios y líneas vacías) ───────────────────────
-while IFS='=' read -r key value; do
-  [[ "$key" =~ ^#.*$ || -z "$key" ]] && continue
-  key="${key//[[:space:]]/}"
-  value="${value//[[:space:]]/}"
-  export "$key=$value"
-done < "$ENV_FILE"
 
 # ─── Usuarios con acceso a conexiones (header auth + admin local) ───────────
 ACCESS_USERS=("$ADMIN_USER")
@@ -107,11 +136,11 @@ read_key() {
 
 # ─── Recopilar índices de conexiones definidas ────────────────────────────────
 indices=()
-while IFS='=' read -r key _; do
+while IFS= read -r key; do
   [[ "$key" =~ ^CON([0-9]+)_TYPE$ ]] && indices+=("${BASH_REMATCH[1]}")
-done < "$ENV_FILE"
+done < <(compgen -A variable)
 
-[[ ${#indices[@]} -eq 0 ]] && { echo "[ERROR] No se encontraron conexiones CON[n] en .env"; exit 1; }
+[[ ${#indices[@]} -eq 0 ]] && { echo "[ERROR] No se encontraron conexiones CON[n] definidas en el script"; exit 1; }
 
 # ─── Generar SQL ──────────────────────────────────────────────────────────────
 echo "[INFO] Generando $OUTPUT_FILE con ${#indices[@]} conexiones..."
