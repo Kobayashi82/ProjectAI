@@ -123,8 +123,6 @@ services:
     image: guacamole/guacamole:1.6.0
     container_name: guacamole
     restart: unless-stopped
-    ports:
-      - "8080:8080"
     environment:
       - GUACD_HOSTNAME=wireguard
       - GUACD_PORT=4822
@@ -303,7 +301,7 @@ services:
     environment:
       - ADMIN_USER=guaca_admin
       - ADMIN_PASS=guaca_pass
-      - GUAC_URL=http://172.18.0.1:8080/guacamole
+      - GUAC_URL=GUAC_URL=http://guacamole:8080/guacamole
       - GUAC_PUBLIC_URL=https://guacamole.mydomain.net/guacamole
       - NODE_ENV=production
       - PORT=4000
