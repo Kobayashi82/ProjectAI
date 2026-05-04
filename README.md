@@ -17,7 +17,7 @@
 `Project AI` es una plataforma centralizada de servicios alojada en un `VPS` con `Docker`. Proporciona acceso unificado a servicios de IA, streaming multimedia, operaciones remotas y monitorizacion en tiempo real.
 
 > [!WARNING]
-> Esto es un proyecto personal yuede contener errores o funciones incompletas. Úsalo bajo tu propia responsabilidad.
+> Esto es un proyecto personal y puede contener errores o funciones incompletas. Úsalo bajo tu propia responsabilidad.
 
 ## Tabla de Contenidos
 
@@ -136,7 +136,7 @@ make restart
 |-------|-----------------------------------------------------------------------------------|
 | `VPS` | *Hetzner CPX32 — 4 vCPU AMD compartidas, 8GB RAM, Ubuntu*                         |
 | `RPI` | *Raspberry Pi 3B+ — ARM Cortex-A53 1.4GHz, 1GB RAM, Raspberry Pi OS*              |
-| `PC`  | *Ryzen 7 7800X3D 8-cores RTX 4070 Super 12GB VRAM, 64GB DDR5 6000MHz, Windows 11* |
+| `PC`  | *Ryzen 7 7800X3D 8-cores, RTX 4070 Super 12GB VRAM, 64GB DDR5 6000MHz, Windows 11* |
 |
 
 | SERVICIO            | NODO | URL                         | PUERTO | DESCRIPCIÓN                                    |
