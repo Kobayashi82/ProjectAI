@@ -2,9 +2,6 @@ import { Fragment, useState, useEffect } from 'react'
 import StatusBadge from './StatusBadge'
 import ActionButton from './ActionButton'
 import MachineIcon from './MachineIcon'
-import padreCover from '../assets/hero-padre.svg'
-import rpiCover from '../assets/hero-rpi.svg'
-import vpsCover from '../assets/hero-vps.svg'
 import { useAction } from '../hooks/useAction.js'
 import { useTelemetry } from '../hooks/useTelemetry.js'
 
@@ -41,12 +38,6 @@ type TelemetryTile = {
     percent: number
     detail?: string
     temp?: string
-}
-
-const COVER_BY_ID: Record<string, string> = {
-    pc: padreCover,
-    rpi: rpiCover,
-    vps: vpsCover,
 }
 
 const getTelemetryTone = (percent: number) => {
@@ -212,7 +203,7 @@ const GAMING_LINKS_BY_MACHINE: Record<string, LinkItem[]> = {
         { label: 'Sunshine', url: toHttpsUrl(import.meta.env.VITE_SUNSHINE_PC_DOMAIN, 'VITE_SUNSHINE_PC_DOMAIN') },
         { label: 'Moonlight', url: toHttpsUrl(import.meta.env.VITE_MOONLIGHT_PC_DOMAIN, 'VITE_MOONLIGHT_PC_DOMAIN') },
     ],
-	vps: [{ label: 'RomM', url: toHttpsUrl(import.meta.env.VITE_ROMM_DOMAIN, 'VITE_ROMM_DOMAIN', '/console') }],
+	vps: [{ label: 'RomM', url: toHttpsUrl(import.meta.env.VITE_ROMM_DOMAIN, 'VITE_ROMM_DOMAIN') }],
 }
 
 const AI_LINKS_BY_MACHINE: Record<string, LinkItem[]> = {
@@ -278,7 +269,6 @@ export default function MachineCard({
 
     const { data: tel } = useTelemetry(telemetry as 'pc' | 'rpi', !!telemetry && online)
 
-    const coverImage   = COVER_BY_ID[id] ?? padreCover
     const accessLinkByType = (type: string) => accessLinks.find((connection) => connection.type.toLowerCase() === type)
     const telemetryTiles = telemetry && online && tel ? buildTelemetryTiles(tel) : []
 

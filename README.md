@@ -155,6 +155,7 @@ make restart
 | `Front`             | VPS  | mydomain.net                | 80     | Frontend de la aplicación                      |
 | `SSH`               | VPS  | mydomain.net                | 22     | Acceso remoto a la terminal                    |
 | `SSH (PC)`          | VPS  | mydomain.net                | 2022   | Túnel SSH hacia `PC`                           |
+| `SSH (RPI)`         | VPS  | mydomain.net                | 2022   | Túnel SSH hacia `RPI`                          |
 | `Telemetría`        | PC   | WireGuard (internal)        | 8000   | Métricas en tiempo real (CPU, RAM, GPU, disco) |
 |
 
