@@ -58,15 +58,15 @@ El sistema se construye sobre:
 ```
 VPS → Caddy ─────────→ WireGuard
       ↓                ↓
-      ├→ Authelia      ├→ PC
-      ├→ Portainer     │  ├→ File Browser
-      ├→ Uptime Kuma   │  ├→ VSCode
-      ├→ Guacamole     │  ├→ Navidrome
-      ├→ File Browser  │  ├→ Jellyfin
-      ├→ Navidrome     │  ├→ Torrent
-      ├→ RomM          │  ├→ Sunshine
-      ├→ Open WebUI    │  ├→ Moonlight
-      └→ SearXNG       │  ├→ ACE Step
+      ├→ Authelia     ├→ PC
+      ├→ Portainer    │  ├→ File Browser
+      ├→ Uptime Kuma  │  ├→ VSCode
+      ├→ Guacamole    │  ├→ Navidrome
+      ├→ File Browser │  ├→ Jellyfin
+      ├→ Navidrome    │  ├→ Torrent
+      ├→ RomM         │  ├→ Sunshine
+      ├→ Open WebUI   │  ├→ Moonlight
+      └→ SearXNG      │  ├→ ACE Step
                        │  ├→ ComfyUI
                        │  ├→ Ollama
                        │  └→ Speaches
