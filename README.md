@@ -35,7 +35,7 @@
 - **Operaciones Remotas Seguras**: Acceso `SSH`, `VNC`, `RDP` a traves de `Guacamole`
 - **IA Centralizada**: `ACE Step`, `ComfyUI` y `Open WebUI` desde un unico dashboard
 - **Centro Multimedia**: `Jellyfin` y `Navidrome` para streaming
-- **Juego remoto**: `Sunshine` y `Moonlight` y `RomM` para consolas retro
+- **Juego remoto**: `Sunshine`, `Moonlight` y `RomM` para consolas retro
 - **Monitorizacion en Tiempo Real**: Metricas en vivo (CPU, RAM, GPU, discos) y `Uptime Kuma` para alertas
 
 ### Seguridad
@@ -58,15 +58,15 @@ El sistema se construye sobre:
 ```
 VPS → Caddy ─────────→ WireGuard
       ↓                ↓
-      ├→ Authelia      ├→ PC
-      ├→ Portainer     │  ├→ File Browser
-      ├→ Uptime Kuma   │  ├→ VSCode
-      ├→ Guacamole     │  ├→ Navidrome
-      ├→ File Browser  │  ├→ Jellyfin
-      ├→ Navidrome     │  ├→ Torrent
-      ├→ RomM          │  ├→ Sunshine
-      ├→ Open WebUI    │  ├→ Moonlight
-      └→ SearXNG       │  ├→ ACE Step
+      ├→ Authelia     ├→ PC
+      ├→ Portainer    │  ├→ File Browser
+      ├→ Uptime Kuma  │  ├→ VSCode
+      ├→ Guacamole    │  ├→ Navidrome
+      ├→ File Browser │  ├→ Jellyfin
+      ├→ Navidrome    │  ├→ Torrent
+      ├→ RomM         │  ├→ Sunshine
+      ├→ Open WebUI   │  ├→ Moonlight
+      └→ SearXNG      │  ├→ ACE Step
                        │  ├→ ComfyUI
                        │  ├→ Ollama
                        │  └→ Speaches
@@ -137,7 +137,6 @@ make restart
 | `VPS` | *Hetzner CPX32 — 4 vCPU AMD compartidas, 8GB RAM, Ubuntu*                         |
 | `RPI` | *Raspberry Pi 3B+ — ARM Cortex-A53 1.4GHz, 1GB RAM, Raspberry Pi OS*              |
 | `PC`  | *Ryzen 7 7800X3D 8-cores, RTX 4070 Super 12GB VRAM, 64GB DDR5 6000MHz, Windows 11* |
-|
 
 | SERVICIO            | NODO | URL                         | PUERTO | DESCRIPCIÓN                                    |
 |---------------------|----- |-----------------------------|--------|------------------------------------------------|
@@ -156,8 +155,6 @@ make restart
 | `SSH`               | VPS  | mydomain.net                | 22     | Acceso remoto a la terminal                    |
 | `SSH (PC)`          | VPS  | mydomain.net                | 2022   | Túnel SSH hacia `PC`                           |
 | `SSH (RPI)`         | VPS  | mydomain.net                | 2022   | Túnel SSH hacia `RPI`                          |
-| `Telemetría`        | PC   | WireGuard (internal)        | 8000   | Métricas en tiempo real (CPU, RAM, GPU, disco) |
-|
 
 | SERVICIO            | NODO | URL                         | PUERTO | DESCRIPCIÓN                                    |
 |---------------------|----- |-----------------------------|--------|------------------------------------------------|
@@ -167,7 +164,6 @@ make restart
 | `File Browser`      | RPi  | files.rpi.mydomain.net      | 8085   | Gestor de archivos                             |
 | `Torrent`           | RPi  | torrent.rpi.mydomain.net    | 8899   | Cliente torrent                                |
 | `Telemetría`        | PC   | WireGuard (internal)        | 8000   | Métricas en tiempo real (CPU, RAM, GPU, disco) |
-|
 
 | SERVICIO            | NODO | URL                         | PUERTO | DESCRIPCIÓN                                    |
 |---------------------|----- |-----------------------------|--------|------------------------------------------------|
@@ -191,7 +187,6 @@ make restart
 | `Speaches`          | PC   | WireGuard (internal)        | 8010   | Síntesis y transcripción de voz `TTS`/`STT`    |
 | `K-Desktop`         | PC   | WireGuard (internal)        | 2501   | Ejecución de comandos remotos                  |
 | `Telemetría`        | PC   | WireGuard (internal)        | 8000   | Métricas en tiempo real (CPU, RAM, GPU, disco) |
-|
 
 ### • Sunshine
 
@@ -204,7 +199,6 @@ make restart
 | `Vídeo y Audio`     | UDP      | 47998-48000 |
 | `Audio`             | UDP      | 48002       |
 | `Micrófono`         | UDP      | 48004       |
-|
 
 ### • Moonlight
 
@@ -212,7 +206,6 @@ make restart
 |---------------------|----------|-------------|
 | `Portal`            | HTTP     | 7891        |
 | `Comunicación`      | UDP      | 40000-40100 |
-|
 
 ```bash
 # Iniciar moonlight-web en PC
@@ -239,7 +232,6 @@ docker run -d --name moonlight-web --restart always -p 7891:8080 -p 40000-40100:
 | `ComfyUI height`    | 438                                              |
 | `ComfyUI steps`     | 430                                              |
 | `ComfyUI seed`      | 430                                              |
-|
 
 ## Licencia
 
