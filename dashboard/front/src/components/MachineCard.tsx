@@ -184,7 +184,6 @@ const FILE_LINKS_BY_MACHINE: Record<string, LinkItem[]> = {
 const DEVELOPMENT_LINKS_BY_MACHINE: Record<string, LinkItem[]> = {
     pc: [
 		{ label: 'VSCode', url: toHttpsUrl(import.meta.env.VITE_VSCODE_PC_DOMAIN, 'VITE_VSCODE_PC_DOMAIN') },
-		{ label: 'GitHub', url: toHttpsUrl('github.com/Kobayashi82') },
 	],
 }
 
@@ -195,7 +194,19 @@ const MULTIMEDIA_LINKS_BY_MACHINE: Record<string, LinkItem[]> = {
         { label: 'Torrent', url: toHttpsUrl(import.meta.env.VITE_TORRENT_PC_DOMAIN, 'VITE_TORRENT_PC_DOMAIN') },
     ],
     rpi: [{ label: 'Torrent', url: toHttpsUrl(import.meta.env.VITE_TORRENT_RPI_DOMAIN, 'VITE_TORRENT_RPI_DOMAIN') }],
-	vps: [{ label: 'Navidrome', url: toHttpsUrl(import.meta.env.VITE_NAVIDROME_DOMAIN, 'VITE_NAVIDROME_DOMAIN') }],
+	vps: [
+		{ label: 'Letterboxd', url: 'https://letterboxd.com/kobayashi82/diary' },
+	    { label: 'Navidrome', url: toHttpsUrl(import.meta.env.VITE_NAVIDROME_DOMAIN, 'VITE_NAVIDROME_DOMAIN') },
+	    { label: 'Kavita', url: toHttpsUrl(import.meta.env.VITE_KAVITA_DOMAIN, 'VITE_KAVITA_DOMAIN') },
+	],
+}
+
+const WEB_LINKS_BY_MACHINE: Record<string, LinkItem[]> = {
+    vps: [
+        { label: 'SearXNG', url: toHttpsUrl(import.meta.env.VITE_SEARXNG_DOMAIN, 'VITE_SEARXNG_DOMAIN') },
+		{ label: 'GitHub', url: 'https://github.com/Kobayashi82' },
+		{ label: '42 Intra', url: 'https://profile.intra.42.fr' },
+    ],
 }
 
 const GAMING_LINKS_BY_MACHINE: Record<string, LinkItem[]> = {
@@ -203,7 +214,10 @@ const GAMING_LINKS_BY_MACHINE: Record<string, LinkItem[]> = {
         { label: 'Sunshine', url: toHttpsUrl(import.meta.env.VITE_SUNSHINE_PC_DOMAIN, 'VITE_SUNSHINE_PC_DOMAIN') },
         { label: 'Moonlight', url: toHttpsUrl(import.meta.env.VITE_MOONLIGHT_PC_DOMAIN, 'VITE_MOONLIGHT_PC_DOMAIN') },
     ],
-	vps: [{ label: 'RomM', url: toHttpsUrl(import.meta.env.VITE_ROMM_DOMAIN, 'VITE_ROMM_DOMAIN') }],
+	vps: [
+		{ label: 'Backloggd', url: 'https://backloggd.com/u/Kobayashi82/games' },
+		{ label: 'RomM', url: toHttpsUrl(import.meta.env.VITE_ROMM_DOMAIN, 'VITE_ROMM_DOMAIN') },
+	],
 }
 
 const AI_LINKS_BY_MACHINE: Record<string, LinkItem[]> = {
@@ -255,6 +269,7 @@ export default function MachineCard({
     const [showAccess, setShowAccess]         = useState(false)
     const [showDevelopment, setShowDevelopment] = useState(false)
     const [showMultimedia, setShowMultimedia] = useState(false)
+    const [showWeb, setShowWeb]               = useState(false)
     const [showGaming, setShowGaming]         = useState(false)
     const [showAi, setShowAi]                 = useState(false)
     const [showMonitor, setShowMonitor]       = useState(false)
@@ -280,6 +295,7 @@ export default function MachineCard({
     ]
     const developmentLinks = DEVELOPMENT_LINKS_BY_MACHINE[id] ?? []
     const multimediaLinks = MULTIMEDIA_LINKS_BY_MACHINE[id] ?? []
+    const webLinks = WEB_LINKS_BY_MACHINE[id] ?? []
     const gamingLinks = GAMING_LINKS_BY_MACHINE[id] ?? []
     const aiLinks = AI_LINKS_BY_MACHINE[id] ?? []
     const monitorLinks = MONITOR_LINKS_BY_MACHINE[id] ?? []
@@ -301,6 +317,15 @@ export default function MachineCard({
             open: showDevelopment,
             setOpen: setShowDevelopment,
             links: developmentLinks,
+            buttonClass: 'btn-service-development',
+        },
+        {
+            key: 'web',
+            title: 'Web',
+            icon: '🌐',
+            open: showWeb,
+            setOpen: setShowWeb,
+            links: webLinks,
             buttonClass: 'btn-service-development',
         },
         {
@@ -355,9 +380,10 @@ export default function MachineCard({
             setShowAccess(globalToggle)
             setShowDevelopment(globalToggle)
             setShowMultimedia(globalToggle)
+            setShowWeb(globalToggle)
+            setShowMonitor(globalToggle)
             setShowGaming(globalToggle)
             setShowAi(globalToggle)
-            setShowMonitor(globalToggle)
             if (globalToggle && id === 'pc' && online && commands.length === 0) {
                 fetchCommands()
             }

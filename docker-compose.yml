@@ -57,7 +57,6 @@ services:
       - "51820:51820/udp"
       - "2022:22"
       - "2023:2023"
-      - "5900:5900"
       - 40000-40100:40000-40100/udp
       - "47984:47984/tcp"
       - "47989:47989/tcp"
@@ -176,6 +175,20 @@ services:
     networks:
       - internal
 
+# ────────── KAVITA ──────────
+
+  kavita:
+    image: jvmilazz0/kavita:latest
+    container_name: kavita
+    restart: unless-stopped
+    volumes:
+      - ./kavita/config:/kavita/config
+      - ./kavita/books:/books:ro
+    environment:
+      - TZ=Europe/Madrid
+    networks:
+      - internal
+
 # ────────── ROMM ──────────
 
   romm:
@@ -267,7 +280,9 @@ services:
         - VITE_UPTIME_KUMA_DOMAIN=kuma.mydomain.net
         - VITE_GUACAMOLE_DOMAIN=guacamole.mydomain.net
         - VITE_FILEBROWSER_VPS_DOMAIN=files.vps.mydomain.net
+        - VITE_SEARXNG_DOMAIN=searxng.mydomain.net
         - VITE_NAVIDROME_DOMAIN=navidrome.mydomain.net
+        - VITE_KAVITA_DOMAIN=kavita.mydomain.net
         - VITE_ROMM_DOMAIN=romm.mydomain.net
         - VITE_FILEBROWSER_RPI_DOMAIN=files.rpi.mydomain.net
         - VITE_TORRENT_RPI_DOMAIN=torrent.rpi.mydomain.net
