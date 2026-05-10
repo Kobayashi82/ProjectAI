@@ -349,7 +349,7 @@ export default function MachineCard({
         {
             key: 'ai',
             title: 'AI',
-            icon: '🪄',
+            icon: '✨',
             open: showAi,
             setOpen: setShowAi,
             links: aiLinks,
