@@ -5,9 +5,9 @@ import type { FastifyRequest, FastifyReply } from 'fastify'
 // -- If the header is missing, someone is bypassing Caddy - reject immediately.
 export async function authHook(request: FastifyRequest, reply: FastifyReply) {
   if (request.url === '/health') return
-	const remoteUser = request.headers['remote-user']
+    const remoteUser = request.headers['remote-user']
 
-	if (!remoteUser) {
-		return reply.code(401).send({ error: 'Unauthorized' })
-	}
+    if (!remoteUser) {
+        return reply.code(401).send({ error: 'Unauthorized' })
+    }
 }

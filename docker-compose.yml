@@ -34,7 +34,7 @@ services:
 # ────────── WIREGUARD ──────────
 
   wireguard:
-    image: linuxserver/wireguard:latest
+    image: linuxserver/wireguard:1.0.20250521-r1-ls109
     container_name: wireguard
     restart: unless-stopped
     cap_add:
@@ -72,7 +72,7 @@ services:
 # ────────── PORTAINER ──────────
 
   portainer:
-    image: portainer/portainer-ce:2.39.0
+    image: portainer/portainer-ce:2.39.2
     container_name: portainer
     restart: unless-stopped
     volumes:
@@ -84,7 +84,7 @@ services:
 # ────────── UPTIME KUMA ──────────
 
   uptime-kuma:
-    image: louislam/uptime-kuma:latest
+    image: louislam/uptime-kuma:1.23.17
     container_name: uptime-kuma
     volumes:
       - uptime-kuma_data:/app/data
@@ -160,10 +160,25 @@ services:
     networks:
       - internal
 
+# ────────── SEARXNG ──────────
+
+  searxng:
+    image: searxng/searxng:2026.5.9-0cba32c15
+    container_name: searxng
+    restart: unless-stopped
+    volumes:
+      - searxng_cache:/var/cache/searxng
+      - ./searxng:/etc/searxng
+    environment:
+      - SEARXNG_PORT=8888
+      - SEARXNG_BASE_URL=https://searxng.mydomain.net/
+    networks:
+      - internal
+
 # ────────── NAVIDROME ──────────
 
   navidrome:
-    image: deluan/navidrome:latest
+    image: deluan/navidrome:0.61.2
     container_name: navidrome
     restart: unless-stopped
     environment:
@@ -178,7 +193,7 @@ services:
 # ────────── KAVITA ──────────
 
   kavita:
-    image: jvmilazz0/kavita:latest
+    image: jvmilazz0/kavita:0.9.0
     container_name: kavita
     restart: unless-stopped
     volumes:
@@ -192,7 +207,7 @@ services:
 # ────────── ROMM ──────────
 
   romm:
-    image: rommapp/romm:latest
+    image: rommapp/romm:4
     container_name: romm
     restart: unless-stopped
     depends_on:
@@ -216,7 +231,7 @@ services:
       - internal
 
   romm-db:
-    image: mariadb:latest
+    image: mariadb:12.2.2
     container_name: romm-db
     restart: unless-stopped
     environment:
@@ -232,7 +247,7 @@ services:
 # ────────── OPEN WEBUI ──────────
 
   openwebui:
-    image: ghcr.io/open-webui/open-webui:v0.9.2
+    image: ghcr.io/open-webui/open-webui:v0.9.4
     container_name: openwebui
     restart: unless-stopped
     network_mode: "service:wireguard"
@@ -252,22 +267,7 @@ services:
     volumes:
       - openwebui_data:/app/backend/data
 
-# ────────── SEARXNG ──────────
-
-  searxng:
-    image: searxng/searxng:latest
-    container_name: searxng
-    restart: unless-stopped
-    volumes:
-      - searxng_cache:/var/cache/searxng
-      - ./searxng:/etc/searxng
-    environment:
-      - SEARXNG_PORT=8888
-      - SEARXNG_BASE_URL=https://searxng.mydomain.net/
-    networks:
-      - internal
-
-# ────────── FRONT ──────────
+# ────────── DASHBOARD ──────────
 
   front:
     container_name: front
@@ -298,8 +298,6 @@ services:
         - VITE_OPENWEBUI_DOMAIN=openwebui.mydomain.net
     networks:
       - internal
-
-# ────────── API ──────────
 
   api:
     container_name: api
@@ -336,15 +334,15 @@ volumes:
   caddy_config:
   portainer_data:
   uptime-kuma_data:
-  navidrome_data:
-  openwebui_data:
-  searxng_cache:
   guacamole_postgres_data:
   filebrowser_config:
   filebrowser_database:
+  searxng_cache:
+  navidrome_data:
   romm_config:
   romm_assets:
   romm_database:
   romm_redis_data:
   romm_library_data:
   romm_resources_data:
+  openwebui_data:

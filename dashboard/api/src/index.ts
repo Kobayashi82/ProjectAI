@@ -19,17 +19,17 @@ process.on('unhandledRejection', (reason) => {
 })
 
 const app = Fastify({
-	logger: {
-		transport: {
-			target: 'pino-pretty',
-			options: { colorize: true },
-		},
-	},
+    logger: {
+        transport: {
+            target: 'pino-pretty',
+            options: { colorize: true },
+        },
+    },
 })
 
 // Remote-User header injected by Authelia/Caddy
 if (config.NODE_ENV === 'production') {
-	app.addHook('onRequest', authHook)
+    app.addHook('onRequest', authHook)
 }
 
 // -- Routes
@@ -44,8 +44,8 @@ app.get('/health', async () => ({ status: 'ok' }))
 
 // -- Start
 try {
-	await app.listen({ port: config.PORT, host: '0.0.0.0' })
+    await app.listen({ port: config.PORT, host: '0.0.0.0' })
 } catch (err) {
-	app.log.error(err)
-	process.exit(1)
+    app.log.error(err)
+    process.exit(1)
 }

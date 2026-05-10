@@ -33,7 +33,7 @@ interface LinkItem {
 type ConfirmAction = 'shutdown' | 'reboot' | null
 
 type TelemetryTile = {
-    key: string
+    id: string
     label: string
     percent: number
     detail?: string
@@ -93,13 +93,13 @@ const TelemetryTileCard = ({ label, percent, detail, temp }: TelemetryTile) => {
 const buildTelemetryTiles = (tel: NonNullable<ReturnType<typeof useTelemetry>['data']>): TelemetryTile[] => {
     const tiles: TelemetryTile[] = [
         {
-            key: 'cpu',
+            id: 'cpu',
             label: 'CPU',
             percent: tel.sistema.cpu_uso_porcentaje,
             temp: tel.sistema.temperatura_cpu,
         },
         {
-            key: 'ram',
+            id: 'ram',
             label: 'RAM',
             percent: tel.sistema.ram.porcentaje,
         },
@@ -112,13 +112,13 @@ const buildTelemetryTiles = (tel: NonNullable<ReturnType<typeof useTelemetry>['d
 
         tiles.push(
             {
-                key: `gpu-${index}`,
+                id: `gpu-${index}`,
                 label: `GPU${suffix}`,
                 percent: gpuPercent,
                 temp: gpu.temp,
             },
             {
-                key: `vram-${index}`,
+                id: `vram-${index}`,
                 label: `VRAM${suffix}`,
                 percent: vramPercent,
             },
@@ -127,7 +127,7 @@ const buildTelemetryTiles = (tel: NonNullable<ReturnType<typeof useTelemetry>['d
 
     Object.entries(tel.discos).forEach(([mount, disk]) => {
         tiles.push({
-            key: `disk-${mount}`,
+            id: `disk-${mount}`,
             label: mount,
             percent: Number.parseFloat(disk.porcentaje),
         })
@@ -487,7 +487,7 @@ export default function MachineCard({
             {telemetryTiles.length > 0 && (
                 <div className="-mt-4 flex flex-wrap items-start gap-1">
                     {telemetryTiles.map((tile) => (
-                        <TelemetryTileCard key={tile.key} {...tile} />
+                        <TelemetryTileCard key={tile.id} {...tile} />
                     ))}
                 </div>
             )}
@@ -601,7 +601,7 @@ export default function MachineCard({
                                         <span className="cmd-name">{cmd}</span>
                                         <button
                                             onClick={() => handleExecute(cmd)}
-                                            disabled={executingCmd !== null}
+                                            disabled={executingCmd === cmd}
                                             className="cmd-run disabled:opacity-40"
                                             aria-label={`Run ${cmd}`}
                                         >

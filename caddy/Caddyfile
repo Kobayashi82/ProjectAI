@@ -6,6 +6,7 @@
         X-Content-Type-Options "nosniff"
         X-Frame-Options "SAMEORIGIN"
         Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
         -Server
     }
 }
@@ -200,6 +201,11 @@ navidrome.pc.mydomain.net {
 
 jellyfin.mydomain.net {
 	import security_headers
+
+    header {
+        Permissions-Policy "autoplay=(self), fullscreen=(self), picture-in-picture=(self)"
+    }
+
     reverse_proxy wireguard:8096
 }
 
@@ -292,6 +298,11 @@ comfyui.mydomain.net {
 
 openwebui.mydomain.net {
 	import security_headers
+
+	header {
+        Permissions-Policy "microphone=(self), camera=(self)"
+    }
+
     forward_auth authelia:9091 {
         uri /api/authz/forward-auth
         copy_headers Remote-User Remote-Groups Remote-Name Remote-Email

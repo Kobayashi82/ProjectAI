@@ -2,8 +2,8 @@ import { NodeSSH } from 'node-ssh'
 import { config } from '../config.js'
 
 interface SSHTarget {
-	host: string
-	username: string
+    host: string
+    username: string
 }
 
 export async function runSSHCommand(target: SSHTarget, command: string, expectDisconnect = false, retries = 3): Promise<string> {
@@ -23,7 +23,7 @@ export async function runSSHCommand(target: SSHTarget, command: string, expectDi
                 if (!connection) throw new Error('SSH connection unavailable')
 
                 await new Promise<void>((resolve, reject) => {
-                    connection.exec(command, (error) => {
+                    connection.exec(command, (error: Error | null) => {
                         if (error) {
                             reject(error)
                             return
@@ -56,12 +56,12 @@ export async function runSSHCommand(target: SSHTarget, command: string, expectDi
 }
 
 export const targets = {
-	pc: {
-		host: config.PC_IP,
-		username: config.SSH_USER_PC,
-	},
-	rpi: {
-		host: config.RPI_IP,
-		username: config.SSH_USER_RPI,
-	},
+    pc: {
+        host: config.PC_IP,
+        username: config.SSH_USER_PC,
+    },
+    rpi: {
+        host: config.RPI_IP,
+        username: config.SSH_USER_RPI,
+    },
 }
