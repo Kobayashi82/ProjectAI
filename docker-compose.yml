@@ -287,7 +287,6 @@ services:
         - VITE_FILEBROWSER_RPI_DOMAIN=files.rpi.mydomain.net
         - VITE_TORRENT_RPI_DOMAIN=torrent.rpi.mydomain.net
         - VITE_FILEBROWSER_PC_DOMAIN=files.pc.mydomain.net
-        - VITE_VSCODE_PC_DOMAIN=vscode.mydomain.net
         - VITE_NAVIDROME_PC_DOMAIN=navidrome.pc.mydomain.net
         - VITE_JELLYFIN_PC_DOMAIN=jellyfin.mydomain.net
         - VITE_TORRENT_PC_DOMAIN=torrent.mydomain.net

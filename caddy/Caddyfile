@@ -174,17 +174,6 @@ files.pc.mydomain.net {
     reverse_proxy wireguard:8085
 }
 
-# ────────── VSCODE ──────────
-
-vscode.mydomain.net {
-	import security_headers
-    forward_auth authelia:9091 {
-        uri /api/authz/forward-auth
-        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
-    }
-	reverse_proxy wireguard:7777
-}
-
 # ────────── NAVIDROME ──────────
 
 navidrome.pc.mydomain.net {

@@ -81,11 +81,9 @@ const TelemetryTileCard = ({ label, percent, detail, temp }: TelemetryTile) => {
                     {detail}
                 </span>
             )}
-            {temp && (
-                <span className="mt-0.5 truncate text-[8px] font-medium text-accent/35 select-none">
-                    {temp}
-                </span>
-            )}
+            <span className="mt-0.5 truncate text-[8px] font-medium text-accent/35 select-none min-h-3">
+                {temp}
+            </span>
         </div>
     )
 }
@@ -182,9 +180,6 @@ const FILE_LINKS_BY_MACHINE: Record<string, LinkItem[]> = {
 }
 
 const DEVELOPMENT_LINKS_BY_MACHINE: Record<string, LinkItem[]> = {
-    pc: [
-		{ label: 'VSCode', url: toHttpsUrl(import.meta.env.VITE_VSCODE_PC_DOMAIN, 'VITE_VSCODE_PC_DOMAIN') },
-	],
 }
 
 const MULTIMEDIA_LINKS_BY_MACHINE: Record<string, LinkItem[]> = {
@@ -202,11 +197,6 @@ const MULTIMEDIA_LINKS_BY_MACHINE: Record<string, LinkItem[]> = {
 }
 
 const WEB_LINKS_BY_MACHINE: Record<string, LinkItem[]> = {
-    vps: [
-        { label: 'SearXNG', url: toHttpsUrl(import.meta.env.VITE_SEARXNG_DOMAIN, 'VITE_SEARXNG_DOMAIN') },
-		{ label: 'GitHub', url: 'https://github.com/Kobayashi82' },
-		{ label: '42 Intra', url: 'https://profile.intra.42.fr' },
-    ],
 }
 
 const GAMING_LINKS_BY_MACHINE: Record<string, LinkItem[]> = {
@@ -302,6 +292,15 @@ export default function MachineCard({
 
     const sections = [
         {
+            key: 'monitor',
+            title: 'Monitor',
+            icon: '📡',
+            open: showMonitor,
+            setOpen: setShowMonitor,
+            links: monitorLinks,
+            buttonClass: 'btn-service-monitor',
+        },
+        {
             key: 'access',
             title: 'Access',
             icon: '🗝️',
@@ -354,15 +353,6 @@ export default function MachineCard({
             setOpen: setShowAi,
             links: aiLinks,
             buttonClass: 'btn-service-ai',
-        },
-        {
-            key: 'monitor',
-            title: 'Monitor',
-            icon: '📈',
-            open: showMonitor,
-            setOpen: setShowMonitor,
-            links: monitorLinks,
-            buttonClass: 'btn-service-monitor',
         },
     ]
 

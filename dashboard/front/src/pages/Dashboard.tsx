@@ -64,7 +64,7 @@ export default function Dashboard() {
 			</header>
 
 			{/* -- Main Content */}
-			<main className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+			<main className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 				<MachineCard
 					id="pc"
 					label="PADRE"
@@ -78,6 +78,15 @@ export default function Dashboard() {
 					globalToggle={allExpanded}
 				/>
 				<MachineCard
+					id="vps"
+					label="VPS"
+					subtitle="linux // x86_64"
+					online={true}
+					statusLoading={false}
+					telemetry="vps"
+					globalToggle={allExpanded}
+				/>
+				<MachineCard
 					id="rpi"
 					label="Raspberry"
 					subtitle="linux // arm64"
@@ -86,15 +95,6 @@ export default function Dashboard() {
 					canShutdown
 					canReboot
 					telemetry="rpi"
-					globalToggle={allExpanded}
-				/>
-				<MachineCard
-					id="vps"
-					label="VPS"
-					subtitle="linux // x86_64"
-					online={true}
-					statusLoading={false}
-					telemetry="vps"
 					globalToggle={allExpanded}
 				/>
 			</main>

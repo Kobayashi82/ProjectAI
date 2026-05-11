@@ -40,20 +40,11 @@ except pynvml.NVMLError:
     _nvml_ready = False
 
 # ---------------------------------------------------------------------------
-# Disk — partitions cached at startup, usage cached with 60s TTL
+# Disk — both partition discovery and usage are cached with 60s TTL
 # ---------------------------------------------------------------------------
 _DISK_TTL_SECONDS: int = 60
 
-# Cache partition list once — partitions don't change at runtime
-_cached_partitions: list = []
-try:
-    for _part in psutil.disk_partitions(all=False):
-        if 'fixed' in _part.opts or 'rw' in _part.opts:
-            _cached_partitions.append(_part)
-except Exception:
-    _cached_partitions = []
-
-# Disk usage cache: stores last read value and its timestamp
+# Disk cache: stores last read value and its timestamp
 _disk_cache: dict = {
     "data":        None,
     "last_update": 0.0
@@ -105,8 +96,9 @@ def _read_gpus() -> list | str:
 def _read_disks() -> dict | str:
     """
     Returns disk usage from cache if within TTL,
-    otherwise reads from disk and updates the cache.
-    Partition list is pre-cached at startup.
+    otherwise rescans partitions and reads usage, then updates the cache.
+    Both partition discovery and usage refresh on the same 60s TTL,
+    so newly connected drives are detected automatically.
     """
     now = time.monotonic()
 
@@ -114,10 +106,16 @@ def _read_disks() -> dict | str:
     if _disk_cache["data"] is not None and (now - _disk_cache["last_update"]) < _DISK_TTL_SECONDS:
         return _disk_cache["data"]
 
-    # TTL expired — read from disk and update cache
+    # TTL expired — rediscover partitions and read usage
     discos = {}
     try:
-        for part in _cached_partitions:
+        # Rescan partitions on every cache miss to detect new drives
+        partitions = []
+        for part in psutil.disk_partitions(all=False):
+            if 'fixed' in part.opts or 'rw' in part.opts:
+                partitions.append(part)
+
+        for part in partitions:
             try:
                 uso = psutil.disk_usage(part.mountpoint)
                 if uso.total > 0:
